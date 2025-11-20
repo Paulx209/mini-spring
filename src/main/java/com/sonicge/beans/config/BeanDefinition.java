@@ -7,7 +7,8 @@ public class BeanDefinition {
     //Bean的类
     private Class beanClass;
 
-    public BeanDefinition(){}
+    public BeanDefinition() {
+    }
 
     public BeanDefinition(Class beanClass) {
         this.beanClass = beanClass;

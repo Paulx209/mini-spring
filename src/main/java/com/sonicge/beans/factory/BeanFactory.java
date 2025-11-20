@@ -1,16 +1,17 @@
 package com.sonicge.beans.factory;
 
+import com.sonicge.beans.BeansException;
+
 import java.util.HashMap;
 import java.util.Map;
 
-public class BeanFactory {
-    private Map<String,Object> beanMap = new HashMap<>();
+public interface BeanFactory {
+    /**
+     * 获取Bean
+     * @param name
+     * @return
+     * @throws 当bean不存在时抛出自定义异常
+     */
+    Object getBean(String name) throws BeansException;
 
-    public void registerBean(String name,Object bean){
-        beanMap.put(name,bean);
-    }
-
-    public Object getBean(String name){
-        return beanMap.get(name);
-    }
 }
