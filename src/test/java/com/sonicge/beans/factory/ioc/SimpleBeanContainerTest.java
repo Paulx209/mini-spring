@@ -1,5 +1,6 @@
 package com.sonicge.beans.factory.ioc;
 
+import cn.hutool.core.io.IoUtil;
 import com.sonicge.beans.PropertyValue;
 import com.sonicge.beans.PropertyValues;
 import com.sonicge.beans.config.BeanDefinition;
@@ -8,9 +9,13 @@ import com.sonicge.beans.factory.ioc.bean.Car;
 import com.sonicge.beans.factory.ioc.bean.People;
 import com.sonicge.beans.factory.ioc.bean.service.HelloService;
 import com.sonicge.beans.support.DefaultListableBeanFactory;
+import com.sonicge.core.io.DefaultResourceLoader;
+import com.sonicge.core.io.Resource;
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import java.io.IOException;
+import java.io.InputStream;
+
 
 
 public class SimpleBeanContainerTest {
@@ -108,6 +113,40 @@ public class SimpleBeanContainerTest {
         People people = (People) beanFactory.getBean("people");
         Car car = people.getCar();
         System.out.println(car);
+    }
+
+    @Test
+    public void testBeanFactory_v6() {
+        DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
+        //加载classpath下的资源
+        try {
+            Resource resource = resourceLoader.getResource("classpath:hello.txt");
+            InputStream inputStream = resource.getInputStream();
+            String text = IoUtil.readUtf8(inputStream);
+            System.out.println(text);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        //加载文件系统资源
+        try {
+            Resource resource = resourceLoader.getResource("src/test/resources/hello.txt");
+            InputStream inputStream = resource.getInputStream();
+            String text = IoUtil.readUtf8(inputStream);
+            System.out.println(text);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        //加载url资源
+        try {
+            Resource resource = resourceLoader.getResource("https://www.baidu.com");
+            InputStream inputStream = resource.getInputStream();
+            String text = IoUtil.readUtf8(inputStream);
+            System.out.println(text);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
