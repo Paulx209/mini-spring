@@ -7,6 +7,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory {
+
+    private InstantiationStrategy instantiationStrategy = new SimpleInstantiationStrategy();
+
     @Override
     protected Object createBean(String beanName, BeanDefinition beanDefinition) throws BeansException {
         return doCreateBean(beanName, beanDefinition);
@@ -15,16 +18,23 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     protected Object doCreateBean(String beanName, BeanDefinition beanDefinition) {
         Object bean = null;
         try {
-            Class beanClass = beanDefinition.getBeanClass();
-            Class<?> clazz = Class.forName(beanClass.getName());
-            //获取无参构造函数
-            Constructor<?> declaredConstructor = clazz.getDeclaredConstructor();
-            bean = declaredConstructor.newInstance();
+            bean = createBeanInstance(beanDefinition);
         } catch (Exception e) {
-            throw new BeansException("类的实例化失败...",e);
+            throw new BeansException("类的实例化失败...", e);
         }
-        addSingleton(beanName,bean);
+        addSingleton(beanName, bean);
         return bean;
     }
 
+    public Object createBeanInstance(BeanDefinition beanDefinition) {
+        return instantiationStrategy.instantiate(beanDefinition);
+    }
+
+    public InstantiationStrategy getInstantiationStrategy() {
+        return instantiationStrategy;
+    }
+
+    public void setInstantiationStrategy(InstantiationStrategy instantiationStrategy) {
+        this.instantiationStrategy = instantiationStrategy;
+    }
 }
