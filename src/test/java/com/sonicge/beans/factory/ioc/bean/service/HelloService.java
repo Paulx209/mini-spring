@@ -1,4 +1,4 @@
-package com.sonicge.beans.factory.service;
+package com.sonicge.beans.factory.ioc.bean.service;
 
 public class HelloService {
     private String name;

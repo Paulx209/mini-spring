@@ -4,6 +4,8 @@ import cn.hutool.core.bean.BeanUtil;
 import com.sonicge.beans.BeansException;
 import com.sonicge.beans.PropertyValue;
 import com.sonicge.beans.config.BeanDefinition;
+import com.sonicge.beans.config.BeanReference;
+import com.sonicge.beans.factory.BeanFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -42,14 +44,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @param beanDefinition
      */
     protected void applyPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
-        Class beanClass = beanDefinition.getBeanClass();
-
         for (PropertyValue pv : beanDefinition.getPropertyValues().getPropertyValues()) {
             //1.获取属性名 和 属性类型
             String name = pv.getName();
             Object value = pv.getValue();
+            if (value instanceof BeanReference) {
+                BeanReference beanReference = (BeanReference) value;
+                String referenceBeanName = beanReference.getBeanName();
+                value = getBean(referenceBeanName);
+            }
             try {
-                BeanUtil.setFieldValue(bean,name,value);
+                //2.通过反射设置属性
+                BeanUtil.setFieldValue(bean, name, value);
             } catch (Exception e) {
                 throw new BeansException("属性赋值失败:" + beanName, e);
             }

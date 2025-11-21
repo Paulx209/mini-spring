@@ -3,7 +3,10 @@ package com.sonicge.beans.factory.ioc;
 import com.sonicge.beans.PropertyValue;
 import com.sonicge.beans.PropertyValues;
 import com.sonicge.beans.config.BeanDefinition;
-import com.sonicge.beans.factory.service.HelloService;
+import com.sonicge.beans.config.BeanReference;
+import com.sonicge.beans.factory.ioc.bean.Car;
+import com.sonicge.beans.factory.ioc.bean.People;
+import com.sonicge.beans.factory.ioc.bean.service.HelloService;
 import com.sonicge.beans.support.DefaultListableBeanFactory;
 import org.junit.Test;
 
@@ -39,11 +42,11 @@ public class SimpleBeanContainerTest {
      * Bean实例化策略InstantiationStrategy
      */
     @Test
-    public void testBeanFactory_v3(){
+    public void testBeanFactory_v3() {
         String beanName = "helloService";
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
         BeanDefinition beanDefinition = new BeanDefinition(HelloService.class);
-        beanFactory.registerBeanDefinition(beanName,beanDefinition);
+        beanFactory.registerBeanDefinition(beanName, beanDefinition);
 
         HelloService helloService = (HelloService) beanFactory.getBean(beanName);
         helloService.sayHello();
@@ -53,21 +56,58 @@ public class SimpleBeanContainerTest {
      * 为Bean填充属性 （Bean实例化 + 属性赋值)
      */
     @Test
-    public void testBeanFactory_v4(){
+    public void testBeanFactory_v4() {
         String beanName = "helloService";
         DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
-        PropertyValue nameProperty = new PropertyValue("name","sonicge");
-        PropertyValue ageProperty = new PropertyValue("age","21");
-        PropertyValue isStudentProperty = new PropertyValue("isStudent","true");
+        PropertyValue nameProperty = new PropertyValue("name", "sonicge");
+        PropertyValue ageProperty = new PropertyValue("age", "21");
+        PropertyValue isStudentProperty = new PropertyValue("isStudent", "true");
         PropertyValues propertyValues = new PropertyValues();
         propertyValues.addPropertyValue(nameProperty);
         propertyValues.addPropertyValue(ageProperty);
         propertyValues.addPropertyValue(isStudentProperty);
 
-        BeanDefinition beanDefinition = new BeanDefinition(HelloService.class,propertyValues);
-        beanFactory.registerBeanDefinition(beanName,beanDefinition);
+        BeanDefinition beanDefinition = new BeanDefinition(HelloService.class, propertyValues);
+        beanFactory.registerBeanDefinition(beanName, beanDefinition);
         HelloService helloService = (HelloService) beanFactory.getBean(beanName);
         System.out.println(helloService);
     }
+
+    /**
+     * 处理Bean中存在引用对象属性！比如说People中有Car属性。
+     *
+     */
+    @Test
+    public void testBeanFactory_v5() {
+        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+        //1.构造Car类的BeanDefinition定义类
+        PropertyValue brandProperty = new PropertyValue("brand", "Benz");
+        PropertyValues carPropertyValues = new PropertyValues();
+        carPropertyValues.addPropertyValue(brandProperty);
+        BeanDefinition carBeanDefinition = new BeanDefinition(Car.class, carPropertyValues);
+
+        //2.构造People类的BeanDefinition定义类
+        PropertyValue nameProperty = new PropertyValue("name", "sonicge");
+        PropertyValue ageProperty = new PropertyValue("age", "21");
+        PropertyValue isStudentProperty = new PropertyValue("isStudent", "true");
+        BeanReference carBeanReference = new BeanReference("car");
+        PropertyValue carBeanReferenceProperty = new PropertyValue("car", carBeanReference);
+        PropertyValues peoplepPropertyValues = new PropertyValues();
+        peoplepPropertyValues.addPropertyValue(nameProperty);
+        peoplepPropertyValues.addPropertyValue(ageProperty);
+        peoplepPropertyValues.addPropertyValue(isStudentProperty);
+        peoplepPropertyValues.addPropertyValue(carBeanReferenceProperty);
+        BeanDefinition peopleBeanDefinition = new BeanDefinition(People.class, peoplepPropertyValues);
+
+        //3.注册BeanDefinition到bean定义表中。用于getBean
+        beanFactory.registerBeanDefinition("people", peopleBeanDefinition);
+        beanFactory.registerBeanDefinition("car", carBeanDefinition);
+
+        //4.beanFactory获取Bean
+        People people = (People) beanFactory.getBean("people");
+        Car car = people.getCar();
+        System.out.println(car);
+    }
+
 }
