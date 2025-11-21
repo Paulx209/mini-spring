@@ -7,6 +7,9 @@ import com.sonicge.beans.factory.service.HelloService;
 import com.sonicge.beans.support.DefaultListableBeanFactory;
 import org.junit.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
+
 public class SimpleBeanContainerTest {
     @Test
     public void testBeanFactory_v1() {
@@ -64,7 +67,7 @@ public class SimpleBeanContainerTest {
 
         BeanDefinition beanDefinition = new BeanDefinition(HelloService.class,propertyValues);
         beanFactory.registerBeanDefinition(beanName,beanDefinition);
-        HelloService bean = (HelloService) beanFactory.getBean(beanName);
-        System.out.println(bean);
+        HelloService helloService = (HelloService) beanFactory.getBean(beanName);
+        System.out.println(helloService);
     }
 }

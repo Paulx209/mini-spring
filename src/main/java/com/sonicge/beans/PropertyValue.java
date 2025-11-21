@@ -5,7 +5,7 @@ public class PropertyValue {
     private String name;
 
     //属性内容
-    private String value;
+    private Object value;
 
     public PropertyValue() {
 
@@ -24,11 +24,11 @@ public class PropertyValue {
         this.name = name;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 }
