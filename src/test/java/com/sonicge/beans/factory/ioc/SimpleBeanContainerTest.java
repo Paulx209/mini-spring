@@ -1,5 +1,7 @@
 package com.sonicge.beans.factory.ioc;
 
+import com.sonicge.beans.PropertyValue;
+import com.sonicge.beans.PropertyValues;
 import com.sonicge.beans.config.BeanDefinition;
 import com.sonicge.beans.factory.service.HelloService;
 import com.sonicge.beans.support.DefaultListableBeanFactory;
@@ -42,5 +44,27 @@ public class SimpleBeanContainerTest {
 
         HelloService helloService = (HelloService) beanFactory.getBean(beanName);
         helloService.sayHello();
+    }
+
+    /**
+     * 为Bean填充属性 （Bean实例化 + 属性赋值)
+     */
+    @Test
+    public void testBeanFactory_v4(){
+        String beanName = "helloService";
+        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+
+        PropertyValue nameProperty = new PropertyValue("name","sonicge");
+        PropertyValue ageProperty = new PropertyValue("age","21");
+        PropertyValue isStudentProperty = new PropertyValue("isStudent","true");
+        PropertyValues propertyValues = new PropertyValues();
+        propertyValues.addPropertyValue(nameProperty);
+        propertyValues.addPropertyValue(ageProperty);
+        propertyValues.addPropertyValue(isStudentProperty);
+
+        BeanDefinition beanDefinition = new BeanDefinition(HelloService.class,propertyValues);
+        beanFactory.registerBeanDefinition(beanName,beanDefinition);
+        HelloService bean = (HelloService) beanFactory.getBean(beanName);
+        System.out.println(bean);
     }
 }
