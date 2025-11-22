@@ -39,15 +39,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         return beanDefinitionMap.containsKey(beanName);
     }
 
-    /**
-     * 提前实例化所有单例实例,牛逼。。。 以前都是通过手动getBean，现在提前实例化好所有的Bean。一触即发
-     *
-     * @throws BeansException
-     */
-    @Override
-    public void preInstantiateSingletons() throws BeansException {
-        beanDefinitionMap.keySet().forEach(this::getBean);
-    }
 
     /**
      * 获取type类型的Bean
