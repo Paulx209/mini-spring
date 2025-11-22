@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.lang.reflect.Field;
 
 
 public class SimpleBeanContainerTest {
@@ -150,6 +150,22 @@ public class SimpleBeanContainerTest {
             String text = IoUtil.readUtf8(inputStream);
             System.out.println(text);
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void test(){
+        try {
+            String className = "com.sonicge.beans.factory.ioc.bean.People";
+            Class<?> clazz = Class.forName(className);
+            System.out.println(clazz.getName());
+            System.out.println(clazz.getSimpleName());
+            Field[] declaredFields = clazz.getDeclaredFields();
+            for(Field field : declaredFields){
+                System.out.println(field.getName());
+            }
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
