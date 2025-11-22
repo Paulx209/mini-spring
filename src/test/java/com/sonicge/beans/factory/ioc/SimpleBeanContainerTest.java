@@ -9,6 +9,7 @@ import com.sonicge.beans.factory.ioc.bean.Car;
 import com.sonicge.beans.factory.ioc.bean.People;
 import com.sonicge.beans.factory.ioc.bean.service.HelloService;
 import com.sonicge.beans.support.DefaultListableBeanFactory;
+import com.sonicge.beans.xml.XmlBeanDefinitionReader;
 import com.sonicge.core.io.DefaultResourceLoader;
 import com.sonicge.core.io.Resource;
 import org.junit.Test;
@@ -80,8 +81,9 @@ public class SimpleBeanContainerTest {
     }
 
     /**
-     * 处理Bean中存在引用对象属性！比如说People中有Car属性。
-     *
+     * 处理Bean中存在引用对象属性！比如说People中有Car属性。通过BeanReference类来进行控制
+     * 目前Bean的属性都是通过PropertyValue来控制的！因此如果是引用对象的话，就会判断name对应的value是否是BeanReference类型的。
+     * 如果是的话，就会取出来其中的属性beanName，然后直接getBean了。
      */
     @Test
     public void testBeanFactory_v5() {
@@ -115,6 +117,9 @@ public class SimpleBeanContainerTest {
         System.out.println(car);
     }
 
+    /**
+     * 测试资源类和资源加载器类
+     */
     @Test
     public void testBeanFactory_v6() {
         DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
@@ -147,6 +152,23 @@ public class SimpleBeanContainerTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 测试解析xml配置文件中的属性，配置成BeanDefinition，不再手动创建BeanDefinition
+     */
+    @Test
+    public void testBeanFactory_v7(){
+        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+        XmlBeanDefinitionReader xmlBeanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
+        //1.解析xml文件 -> 封装成对应的BeanDefinition
+        xmlBeanDefinitionReader.loadBeanDefinitions("classpath:spring.xml");
+        //2.获取Bean
+        People people = (People) beanFactory.getBean("people");
+        System.out.println(people);
+
+        Car car = (Car) beanFactory.getBean("car");
+        System.out.println(car);
     }
 
 }

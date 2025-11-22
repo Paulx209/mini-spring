@@ -42,4 +42,14 @@ public class People {
     public void setCar(Car car) {
         this.car = car;
     }
+
+    @Override
+    public String toString() {
+        return "People{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                ", isStudent=" + isStudent +
+                ", car=" + car +
+                '}';
+    }
 }
