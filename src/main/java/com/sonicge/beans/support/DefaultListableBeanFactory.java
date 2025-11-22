@@ -6,6 +6,7 @@ import com.sonicge.beans.factory.ConfigurableListableBeanFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements BeanDefinitionRegistry, ConfigurableListableBeanFactory {
 
@@ -67,5 +68,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             }
         });
         return result;
+    }
+
+    @Override
+    public String[] getBeanDefinitionNames() {
+        Set<String> beanNameSet = beanDefinitionMap.keySet();
+        return beanNameSet.toArray(new String[beanNameSet.size()]);
     }
 }
