@@ -7,6 +7,15 @@ public class PropertyValues {
     private List<PropertyValue> propertyValueList = new ArrayList<>();
 
     public void addPropertyValue(PropertyValue propertyValue) {
+        //增加属性值替换功能。
+        for (int i = 0; i < propertyValueList.size(); i++) {
+            PropertyValue currentPropertyValue = propertyValueList.get(i);
+            if(currentPropertyValue.getName().equals(propertyValue.getName())){
+                //如果属性名相同的话，直接进行覆盖！
+                this.propertyValueList.set(i,propertyValue);
+                return;
+            }
+        }
         propertyValueList.add(propertyValue);
     }
 

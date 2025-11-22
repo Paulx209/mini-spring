@@ -3,17 +3,20 @@ package com.sonicge.beans.support;
 import cn.hutool.core.bean.BeanUtil;
 import com.sonicge.beans.BeansException;
 import com.sonicge.beans.PropertyValue;
+import com.sonicge.beans.config.AutowireCapableBeanFactory;
 import com.sonicge.beans.config.BeanDefinition;
+import com.sonicge.beans.config.BeanPostProcessor;
 import com.sonicge.beans.config.BeanReference;
 import com.sonicge.beans.factory.BeanFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 import static java.lang.Boolean.parseBoolean;
 
-public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory {
+public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
     private InstantiationStrategy instantiationStrategy = new SimpleInstantiationStrategy();
 
@@ -29,6 +32,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             bean = createBeanInstance(beanDefinition);
             //2.为bean填充属性  （这里类似于执行bean的生命周期）
             applyPropertyValues(beanName, bean, beanDefinition);
+            //3.执行bean的初始化方法和BeanPostProcessor的前置和后置处理方法
+            initializeBean(beanName,bean,beanDefinition);
         } catch (Exception e) {
             throw new BeansException("类的实例化失败...", e);
         }
@@ -62,31 +67,54 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
     }
 
-//    protected Object convertStringToType(String stringValue,Class<?> targetType){
-//        if(stringValue  == null){
-//            return null;
-//        }
-//        // 根据目标类型进行转换
-//        if (targetType == String.class) {
-//            return stringValue;
-//        } else if (targetType == Integer.class || targetType == int.class) {
-//            return Integer.parseInt(stringValue);
-//        } else if (targetType == Long.class || targetType == long.class) {
-//            return Long.parseLong(stringValue);
-//        } else if (targetType == Double.class || targetType == double.class) {
-//            return Double.parseDouble(stringValue);
-//        } else if (targetType == Float.class || targetType == float.class) {
-//            return Float.parseFloat(stringValue);
-//        } else if (targetType == Boolean.class || targetType == boolean.class) {
-//            // 布尔类型转换，支持 "true", "false", "1", "0" 等
-//            return parseBoolean(stringValue);
-//        } else if (targetType == Character.class || targetType == char.class) {
-//            return stringValue.charAt(0);
-//        } else {
-//            // 其他类型可以继续扩展，或者抛出异常
-//            throw new BeansException("不支持的类型转换: " + targetType.getName());
-//        }
-//    }
+    protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) throws BeansException {
+        //执行BeanPostProcessor的前置处理器
+        Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
+
+        //执行Bean的初始化方法
+        invokeInitMethods(beanName, wrappedBean, beanDefinition);
+
+        //执行BeanPostProcessor的后置处理器
+        wrappedBean = applyBeanPostProcessorAfterInitialization(bean, beanName);
+
+        return wrappedBean;
+
+    }
+
+
+    @Override
+    public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) throws BeansException {
+        Object result = existingBean;
+        List<BeanPostProcessor> beanPostProcessors = this.getBeanPostProcessors();
+        for (BeanPostProcessor processor : beanPostProcessors) {
+            Object current = processor.postProcessBeforeInitialization(result, beanName);
+            if (current == null) {
+                return result;
+            }
+            result = current;
+        }
+        return result;
+    }
+
+    @Override
+    public Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) throws BeansException {
+        Object result = existingBean;
+        List<BeanPostProcessor> beanPostProcessors = this.getBeanPostProcessors();
+        for (BeanPostProcessor processor : beanPostProcessors) {
+            Object current = processor.postProcessAfterInitialization(result, beanName);
+            if (current == null) {
+                return result;
+            }
+            result = current;
+        }
+        return result;
+    }
+
+    private void invokeInitMethods(String beanName, Object wrappedBean, BeanDefinition beanDefinition) {
+        //todo 待实现
+        System.out.println("执行bean[" + beanName + "]的初始化方法");
+    }
+
 
     public Object createBeanInstance(BeanDefinition beanDefinition) {
         return instantiationStrategy.instantiate(beanDefinition);
