@@ -7,11 +7,15 @@ import com.sonicge.core.io.ResourceLoader;
 public abstract class AbstracteBeanDefinitionReader implements BeanDefinitionReader {
     public final BeanDefinitionRegistry registry;
 
-    private  ResourceLoader resourceLoader;
+    private ResourceLoader resourceLoader;
 
     public AbstracteBeanDefinitionReader(BeanDefinitionRegistry registry) {
+        this(registry, new DefaultResourceLoader());
+    }
+
+    public AbstracteBeanDefinitionReader(BeanDefinitionRegistry registry, ResourceLoader resourceLoader) {
         this.registry = registry;
-        this.resourceLoader = new DefaultResourceLoader();
+        this.resourceLoader = resourceLoader;
     }
 
 

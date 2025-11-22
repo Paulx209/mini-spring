@@ -12,7 +12,6 @@ import com.sonicge.core.io.Resource;
 import com.sonicge.core.io.ResourceLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.IOException;
@@ -31,6 +30,10 @@ public class XmlBeanDefinitionReader extends AbstracteBeanDefinitionReader {
         super(registry);
     }
 
+    public XmlBeanDefinitionReader(BeanDefinitionRegistry registry, ResourceLoader resourceLoader) {
+        super(registry, resourceLoader);
+    }
+
     @Override
     public void loadBeanDefinitions(String location) throws BeansException {
         ResourceLoader resourceLoader = getResourceLoader();
@@ -47,12 +50,12 @@ public class XmlBeanDefinitionReader extends AbstracteBeanDefinitionReader {
             } finally {
                 inputStream.close();
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new BeansException("IOException parsing XML document from " + resource, e);
         }
     }
 
-    protected void doLoadBeanDefinition(InputStream inputStream) throws Exception {
+    protected void doLoadBeanDefinition(InputStream inputStream) {
         Document document = XmlUtil.readXML(inputStream);
         //beans标签
         Element root = document.getDocumentElement();
@@ -68,7 +71,12 @@ public class XmlBeanDefinitionReader extends AbstracteBeanDefinitionReader {
                     String name = beanElement.getAttribute(NAME_ATTRIBUTE);
                     String className = beanElement.getAttribute(CLASS_ATTRIBUTE);
 
-                    Class<?> clazz = Class.forName(className);
+                    Class<?> clazz = null;
+                    try {
+                        clazz = Class.forName(className);
+                    } catch (ClassNotFoundException e) {
+                        throw new BeansException("Cannot find class [" + className + "]");
+                    }
                     //id的优先级大于name
                     String beanName = StrUtil.isNotEmpty(id) ? id : name;
                     if (StrUtil.isEmpty(beanName)) {
@@ -86,6 +94,11 @@ public class XmlBeanDefinitionReader extends AbstracteBeanDefinitionReader {
                                 String propertyName = property.getAttribute(NAME_ATTRIBUTE);
                                 String propertyValue = property.getAttribute(VALUE_ATTRIBUTE);
                                 String propertyRef = property.getAttribute(REF_ATTRIBUTE);
+
+                                if (StrUtil.isEmpty(propertyName)) {
+                                    throw new BeansException("The name attribute cannot be null or empty");
+                                }
+
                                 Object value = propertyValue;
                                 if (StrUtil.isNotEmpty(propertyRef)) {
                                     //这里的ref的值 -> <bean>标签中的id属性； 添加BeanDefinition的时候，id属性优先级也是最高的。
@@ -95,6 +108,9 @@ public class XmlBeanDefinitionReader extends AbstracteBeanDefinitionReader {
                                 beanDefinition.getPropertyValues().addPropertyValue(pv);
                             }
                         }
+                    }
+                    if (getRegistry().containsBeanDefinition(beanName)) {
+                        throw new BeansException("Duplicate beanName[\" + beanName + \"] is not allowed");
                     }
                     getRegistry().registerBeanDefinition(beanName, beanDefinition);
                 }
