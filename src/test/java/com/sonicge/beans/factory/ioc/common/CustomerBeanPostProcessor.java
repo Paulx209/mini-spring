@@ -7,7 +7,7 @@ import com.sonicge.beans.factory.ioc.bean.Car;
 public class CustomerBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        System.out.println("CustomerBeanPostProcessor#postProcessBeforeInitialization");
+        System.out.println("CustomerBeanPostProcessor#postProcessBeforeInitialization, beanName: " + beanName);
         if("car" . equals(beanName)){
             Car car = (Car) bean;
             car.setBrand("lamborghini");
@@ -17,7 +17,7 @@ public class CustomerBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        System.out.println("CustomerBeanPostProcessor#postProcessBeforeInitialization");
+        System.out.println("CustomerBeanPostProcessor#postProcessAfterInitialization, beanName: " + beanName);
         return bean;
     }
 }

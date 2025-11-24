@@ -10,6 +10,7 @@ import com.sonicge.beans.factory.ConfigurableListableBeanFactory;
 public class CustomBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeanException {
+        System.out.println("CustomBeanFactoryPostProcessor#postProcessBeanFactory");
         BeanDefinition peopleBeanDefinition = beanFactory.getBeanDefinition("people");
         PropertyValues propertyValues = peopleBeanDefinition.getPropertyValues();
         propertyValues.addPropertyValue(new PropertyValue("name","tony"));

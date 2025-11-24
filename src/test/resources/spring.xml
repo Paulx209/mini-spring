@@ -18,4 +18,8 @@
         <property name="car" ref="car" />
     </bean>
 
+    <bean id="customBeanFactoryPostProcessor" class="com.sonicge.beans.factory.ioc.common.CustomBeanFactoryPostProcessor"/>
+
+    <bean id="customerBeanPostProcessor" class="com.sonicge.beans.factory.ioc.common.CustomerBeanPostProcessor"/>
+
 </beans>
