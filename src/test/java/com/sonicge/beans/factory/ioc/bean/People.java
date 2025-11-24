@@ -1,8 +1,10 @@
 package com.sonicge.beans.factory.ioc.bean;
 
 import com.sonicge.beans.config.BeanReference;
+import com.sonicge.beans.factory.DisposableBean;
+import com.sonicge.beans.factory.InitializingBean;
 
-public class People {
+public class People implements InitializingBean, DisposableBean {
     private String name;
 
     private Integer age;
@@ -41,6 +43,26 @@ public class People {
 
     public void setCar(Car car) {
         this.car = car;
+    }
+
+
+
+    public void customDestroyMethod() {
+        System.out.println("I died in the method named customDestroyMethod");
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("I was born in the method named afterPropertiesSet");
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        System.out.println("I died in the method named destroy");
+    }
+
+    public void customInitMethod(){
+        System.out.println("I was born in the method named customInitMethod");
     }
 
     @Override
