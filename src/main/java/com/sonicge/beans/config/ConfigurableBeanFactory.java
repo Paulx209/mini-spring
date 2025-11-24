@@ -13,5 +13,5 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory,Singlet
     /**
      * 销毁单例bean
      */
-    void destroySingleton();
+    void destroySingletons();
 }

@@ -11,23 +11,23 @@ import java.util.Set;
 public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
     private Map<String, Object> singletonObjects = new HashMap<>();
 
-//    private final Map<String, DisposableBean> disposableBeans = new HashMap<>();
+    private final Map<String,DisposableBean> disposableBeans = new HashMap<>();
 
-//    public void registerDisposableBean(String beanName,DisposableBean bean){
-//        disposableBeans.put(beanName,bean);
-//    }
+    public void registerDisposableBean(String beanName,DisposableBean disposableBean){
+        disposableBeans.put(beanName,disposableBean);
+    }
 
-//    public void destroySingletons(){
-//        Set<String> beanNames = disposableBeans.keySet();
-//        for(String beanName : beanNames){
-//            DisposableBean disposableBean = disposableBeans.remove(beanName);
-//            try {
-//                disposableBean.destroy();
-//            } catch (Exception e) {
-//                throw new BeansException("Destroy method on bean with name '" + beanName + "' threw an exception", e);
-//            }
-//        }
-//    }
+    public void destroySingletons(){
+        Set<String> beanNames = disposableBeans.keySet();
+        for(String beanName : beanNames){
+            DisposableBean disposableBean = disposableBeans.remove(beanName);
+            try {
+                disposableBean.destroy();
+            } catch (Exception e) {
+                throw new BeansException("Destroy method on bean with name '" + beanName + "' threw an exception", e);
+            }
+        }
+    }
 
     @Override
     public Object getSingleton(String beanName) {

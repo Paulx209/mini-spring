@@ -43,26 +43,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         } catch (Exception e) {
             throw new BeansException("类的实例化失败...", e);
         }
-//        //注册有销毁方法的bean
-//        registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
+
+        registerDisposableBeanIfNecessary(beanName,bean,beanDefinition);
 
         addSingleton(beanName, bean);
         return bean;
     }
 
-//    /**
-//     * 注册有销毁方法的bean，即bean继承自 DisposableBean 或 有自定义的销毁方法
-//     *
-//     * @param beanName
-//     * @param bean
-//     * @param beanDefinition
-//     */
-//    protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
-//        //如果bean的类型是DisposableBean 或者 beanDefinition存在DestroyMethodName属性！
-//        if(bean instanceof DisposableBean || StrUtil.isNotEmpty(beanDefinition.getDestroyMethodName())){
-//            registerDisposableBean();
-//        }
-//    }
+    protected void registerDisposableBeanIfNecessary(String beanName,Object bean,BeanDefinition beanDefinition){
+        if(bean instanceof DisposableBean || StrUtil.isNotEmpty(beanDefinition.getDestroyMethodName())){
+            registerDisposableBean(beanName,new DisposableBeanAdapter(bean,beanName,beanDefinition));
+        }
+    }
 
     /**
      * 给bean填充属性
@@ -135,18 +127,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     /**
      * 初始化方法，包括两个步骤，一个是afterProperties()方法； 另一个是自定义的InitMethodName()方法！
+     *
      * @param beanName
      * @param bean
      * @param beanDefinition
      * @throws Exception
      */
     private void invokeInitMethods(String beanName, Object bean, BeanDefinition beanDefinition) throws Exception {
-        if (bean instanceof InitializingBean) {
+        //1.先执行InitializingBean接口下的afterProperties方法
+        if (bean instanceof InitializingBean  ) {
             //如果bean是InitializingBean接口的实现类的话。
             ((InitializingBean) bean).afterPropertiesSet();
         }
+        //2.再执行自定义的init-method方法
         String initMethodName = beanDefinition.getInitMethodName();
-        if (StrUtil.isNotEmpty(initMethodName)) {
+        //避免重复调用afterPropertiesSet方法(如果bean属于InitializingBean接口的实现类，并且init-method属性的方法也是afterPropertiesSet方法的话，则不执行init-method方法)
+        if (StrUtil.isNotEmpty(initMethodName) && !(bean instanceof  InitializingBean && (initMethodName . equals("afterPropertiesSet")))) {
             Method initMethod = ClassUtil.getPublicMethod(beanDefinition.getBeanClass(), initMethodName);
             if (initMethod == null) {
                 throw new BeansException("Could not find an init method named '" + initMethodName + "' on bean with name '" + beanName + "'");

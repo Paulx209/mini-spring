@@ -1,5 +1,4 @@
 package com.sonicge.beans.support;
-
 import com.sonicge.beans.BeansException;
 import com.sonicge.beans.config.BeanFactoryPostProcessor;
 import com.sonicge.beans.config.BeanPostProcessor;
@@ -81,5 +80,27 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
         return getBeanFactory().getBean(name, requiredType);
+    }
+
+    @Override
+    public void close() {
+        doClose();
+    }
+
+    public void doClose(){
+        destroyBeans();
+    }
+    public void destroyBeans(){
+        getBeanFactory().destroySingletons();
+    }
+
+    @Override
+    public void registerShutdownHook() {
+        Thread shutdownHook = new Thread(){
+            public void run(){
+                doClose();
+            }
+        };
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
     }
 }

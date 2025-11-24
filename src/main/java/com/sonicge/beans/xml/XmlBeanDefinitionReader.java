@@ -19,13 +19,15 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
-    public static final String BEAN_ELEMENT = "bean";
-    public static final String PROPERTY_ELEMENT = "property";
-    public static final String ID_ELEMENT = "id";
-    public static final String NAME_ELEMENT = "name";
-    public static final String CLASS_ELEMENT = "class";
-    public static final String VALUE_ELEMENT = "value";
-    public static final String REF_ELEMENT = "ref";
+    public static final String BEAN_ATTRIBUTE = "bean";
+    public static final String PROPERTY_ATTRIBUTE = "property";
+    public static final String ID_ATTRIBUTE = "id";
+    public static final String NAME_ATTRIBUTE = "name";
+    public static final String CLASS_ATTRIBUTE = "class";
+    public static final String VALUE_ATTRIBUTE = "value";
+    public static final String REF_ATTRIBUTE = "ref";
+    public static final String INIT_METHOD_ATTRIBUTE = "init-method";
+    public static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
 
     public XmlBeanDefinitionReader(BeanDefinitionRegistry registry) {
         super(registry);
@@ -62,13 +64,15 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
         for (int i = 0; i < childNodes.getLength(); i++) {
             if (childNodes.item(i) instanceof Element) {
                 System.out.println("标签的名称为：" + childNodes.item(i).getNodeName());
-                if (BEAN_ELEMENT.equals(childNodes.item(i).getNodeName())) {
+                if (BEAN_ATTRIBUTE.equals(childNodes.item(i).getNodeName())) {
                     //解析Bean标签
                     try {
                         Element bean = (Element) childNodes.item(i);
-                        String id = bean.getAttribute(ID_ELEMENT);
-                        String name = bean.getAttribute(NAME_ELEMENT);
-                        String className = bean.getAttribute(CLASS_ELEMENT);
+                        String id = bean.getAttribute(ID_ATTRIBUTE);
+                        String name = bean.getAttribute(NAME_ATTRIBUTE);
+                        String className = bean.getAttribute(CLASS_ATTRIBUTE);
+                        String initMethodName = bean.getAttribute(INIT_METHOD_ATTRIBUTE);
+                        String destroyMethodName = bean.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 
                         //BeanDefinition的第一个参数 ---clazz对象
                         Class<?> clazz = Class.forName(className);
@@ -80,16 +84,18 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
                         }
                         //创建BeanDefinition对象
                         BeanDefinition beanDefinition = new BeanDefinition(clazz);
+                        beanDefinition.setInitMethodName(initMethodName);
+                        beanDefinition.setDestroyMethodName(destroyMethodName);
 
                         //开始遍历bean标签中的子标签
                         NodeList beanChildNodes = bean.getChildNodes();
                         for (int j = 0; j < beanChildNodes.getLength(); j++) {
-                            if (PROPERTY_ELEMENT.equals(beanChildNodes.item(i).getNodeName())) {
+                            if (PROPERTY_ATTRIBUTE.equals(beanChildNodes.item(j).getNodeName())) {
                                 //开始解析property标签
-                                Element property = (Element) beanChildNodes.item(i);
-                                String propertyName = property.getAttribute(NAME_ELEMENT);
-                                String propertyValue = property.getAttribute(VALUE_ELEMENT);
-                                String propertyRef = property.getAttribute(REF_ELEMENT);
+                                Element property = (Element) beanChildNodes.item(j);
+                                String propertyName = property.getAttribute(NAME_ATTRIBUTE);
+                                String propertyValue = property.getAttribute(VALUE_ATTRIBUTE);
+                                String propertyRef = property.getAttribute(REF_ATTRIBUTE);
 
                                 Object value = propertyValue;
                                 if (StrUtil.isNotBlank(propertyRef)) {
