@@ -1,7 +1,6 @@
 package com.sonicge.beans.support;
 
 import com.sonicge.beans.BeansException;
-import com.sun.tools.javac.code.Attribute;
 
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
 
