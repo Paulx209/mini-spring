@@ -14,7 +14,7 @@ public interface ConfigurableListableBeanFactory extends ListableBeanFactory, Au
      * @return
      */
     BeanDefinition getBeanDefinition(String beanName) throws BeansException;
-
+//
 //    /**
 //     * 提前实例化所有的单例实例
 //     * @throws BeansException

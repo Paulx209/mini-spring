@@ -6,14 +6,14 @@ import java.util.Map;
 
 public interface ListableBeanFactory extends BeanFactory {
     /**
-     * 返回指定类型的所有实例  (不再是单例bean)
+     * 提前doCreateBean(实例化、属性赋值、初始化)某个Bean类型
      * @param type
      * @param <T>
      * @return
      * @throws BeansException
      */
 
-    <T> Map<String, T> getBeanOfType(Class<T> type) throws BeansException;
+    <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException;
 
 
     /**
