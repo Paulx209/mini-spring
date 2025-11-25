@@ -11,6 +11,7 @@ import com.sonicge.beans.config.BeanDefinition;
 import com.sonicge.beans.config.BeanPostProcessor;
 import com.sonicge.beans.config.BeanReference;
 import com.sonicge.beans.factory.BeanFactory;
+import com.sonicge.beans.factory.BeanFactoryAware;
 import com.sonicge.beans.factory.DisposableBean;
 import com.sonicge.beans.factory.InitializingBean;
 
@@ -83,6 +84,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) throws Exception {
+        if(bean instanceof BeanFactoryAware){
+            ((BeanFactoryAware) bean).setBeanFactory(this);
+        }
+
         //执行BeanPostProcessor的前置处理器
         Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
 
