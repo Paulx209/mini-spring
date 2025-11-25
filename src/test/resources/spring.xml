@@ -18,8 +18,9 @@
         <property name="car" ref="car" />
     </bean>
 
-    <bean id="customBeanFactoryPostProcessor" class="com.sonicge.beans.factory.ioc.common.CustomBeanFactoryPostProcessor"/>
+<!--    <bean id="customBeanFactoryPostProcessor" class="com.sonicge.beans.factory.ioc.common.CustomBeanFactoryPostProcessor"/>-->
 
-    <bean id="customerBeanPostProcessor" class="com.sonicge.beans.factory.ioc.common.CustomerBeanPostProcessor"/>
+<!--    <bean id="customerBeanPostProcessor" class="com.sonicge.beans.factory.ioc.common.CustomerBeanPostProcessor"/>-->
 
+    <bean id="helloService" class="com.sonicge.beans.factory.ioc.bean.service.HelloService"/>
 </beans>

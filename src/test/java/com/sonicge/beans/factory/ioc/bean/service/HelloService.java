@@ -1,6 +1,17 @@
 package com.sonicge.beans.factory.ioc.bean.service;
 
-public class HelloService {
+import com.sonicge.beans.BeansException;
+import com.sonicge.beans.context.ApplicationContext;
+import com.sonicge.beans.context.ApplicationContextAware;
+import com.sonicge.beans.factory.BeanFactory;
+import com.sonicge.beans.factory.BeanFactoryAware;
+
+public class HelloService implements ApplicationContextAware, BeanFactoryAware {
+
+    private BeanFactory beanFactory;
+
+    private ApplicationContext applicationContext;
+
     private String name;
 
     private Integer age;
@@ -48,6 +59,23 @@ public class HelloService {
         isStudent = student;
     }
 
+    @Override
+    public void setApplicationContext(ApplicationContext context) throws BeansException {
+        this.applicationContext = context;
+    }
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
+    }
+
+    public BeanFactory getBeanFactory() {
+        return beanFactory;
+    }
+
+    public ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
 
     @Override
     public String toString() {
