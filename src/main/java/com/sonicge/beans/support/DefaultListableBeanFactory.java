@@ -42,6 +42,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
     /**
      * 获取type类型的Bean
+     *
      * @param type
      * @param <T>
      * @return
@@ -70,6 +71,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     @Override
     public void preInstantiateSingletons() throws BeansException {
         //name  beanDefinitio
-        beanDefinitionMap.keySet().stream().forEach(name -> getBean(name));
+        beanDefinitionMap.entrySet().stream().forEach(entry -> {
+            if (entry.getValue().isSingleton()) {
+                getBean(entry.getKey());
+            }
+        });
     }
 }

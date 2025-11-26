@@ -28,6 +28,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     public static final String REF_ATTRIBUTE = "ref";
     public static final String INIT_METHOD_ATTRIBUTE = "init-method";
     public static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
+    public static final String SCOPE_ATTRIBUTE = "scope";
 
     public XmlBeanDefinitionReader(BeanDefinitionRegistry registry) {
         super(registry);
@@ -73,6 +74,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
                         String className = bean.getAttribute(CLASS_ATTRIBUTE);
                         String initMethodName = bean.getAttribute(INIT_METHOD_ATTRIBUTE);
                         String destroyMethodName = bean.getAttribute(DESTROY_METHOD_ATTRIBUTE);
+                        String scope = bean.getAttribute(SCOPE_ATTRIBUTE);
 
                         //BeanDefinition的第一个参数 ---clazz对象
                         Class<?> clazz = Class.forName(className);
@@ -87,8 +89,17 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
                         beanDefinition.setInitMethodName(initMethodName);
                         beanDefinition.setDestroyMethodName(destroyMethodName);
 
-                        //开始遍历bean标签中的子标签
-                        NodeList beanChildNodes = bean.getChildNodes();
+                        if(StrUtil.isNotEmpty(scope)){
+                            beanDefinition.setScope(scope);
+                        }
+                        if(scope.equals(BeanDefinition.SCOPE_PROTOTYPE)){
+                            //如果是多实例的话
+                            beanDefinition.setSingleton(false);
+                            beanDefinition.setPrototype(true);
+                        }
+
+                            //开始遍历bean标签中的子标签
+                            NodeList beanChildNodes = bean.getChildNodes();
                         for (int j = 0; j < beanChildNodes.getLength(); j++) {
                             if (PROPERTY_ATTRIBUTE.equals(beanChildNodes.item(j).getNodeName())) {
                                 //开始解析property标签
