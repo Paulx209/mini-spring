@@ -1,31 +1,70 @@
 package com.sonicge.beans.support;
 
+import cn.hutool.json.JSONObject;
 import com.sonicge.beans.BeansException;
 import com.sonicge.beans.config.BeanDefinition;
 import com.sonicge.beans.config.BeanPostProcessor;
 import com.sonicge.beans.config.ConfigurableBeanFactory;
 import com.sonicge.beans.factory.BeanFactory;
+import com.sonicge.beans.factory.FactoryBean;
+import net.sf.cglib.proxy.Factory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry implements ConfigurableBeanFactory {
 
-    private  final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
+    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
+
+    private final Map<String, Object> factoryBeanObjectCache = new HashMap<>();
+
     @Override
     public Object getBean(String name) throws BeansException {
-        Object bean = getSingleton(name);
-        if(bean!=null){
-            return bean;
+        Object sharedInstance = getSingleton(name);
+        if (sharedInstance != null) {
+            //可能存在特殊的bean
+            return getObjectForBeanInstance(sharedInstance, name);
         }
         //如果BeanFactory中不存在bean的话，创建一个新的bean。
         Object newBean = createBean(name, getBeanDefinition(name));
-        return newBean;
+        return getObjectForBeanInstance(newBean, name);
+    }
+
+    /**
+     * 如果是FactoryBean,从FactoryBean#getObject中创建bean
+     *
+     * @param beanInstance
+     * @param beanName
+     * @return
+     */
+    protected Object getObjectForBeanInstance(Object beanInstance, String beanName) {
+        Object bean = beanInstance;
+        if (beanInstance instanceof FactoryBean) {
+            FactoryBean instance = (FactoryBean) beanInstance;
+            try {
+                if (instance.isSingleton()) {
+                    //如果是单例的话
+                    bean = factoryBeanObjectCache.get(beanName);
+                    if (bean == null) {
+                        bean = instance.getObject();
+                        factoryBeanObjectCache.put(beanName, bean);
+                    }
+                } else {
+                    //如果是非单例的话
+                    bean = instance.getObject();
+                }
+            } catch (Exception ex) {
+                throw new BeansException("FactoryBean threw exception on object[" + beanName + "] creation", ex);
+            }
+        }
+        return bean;
     }
 
     @Override
     public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
-        return ((T)getBean(name));
+        return ((T) getBean(name));
     }
 
     @Override
@@ -35,7 +74,7 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         this.beanPostProcessors.add(beanPostProcessor);
     }
 
-    public List<BeanPostProcessor> getBeanPostProcessors(){
+    public List<BeanPostProcessor> getBeanPostProcessors() {
         return this.beanPostProcessors;
     }
 
