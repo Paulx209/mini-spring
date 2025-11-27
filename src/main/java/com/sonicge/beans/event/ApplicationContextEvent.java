@@ -5,8 +5,12 @@ import com.sonicge.beans.context.ApplicationEvent;
 
 public abstract class ApplicationContextEvent extends ApplicationEvent {
 
-
-    public ApplicationContextEvent(ApplicationContext source) {
+    /**
+     * 需要传递一个事件源！
+     *
+     * @param source
+     */
+    public ApplicationContextEvent(Object source) {
         super(source);
     }
 

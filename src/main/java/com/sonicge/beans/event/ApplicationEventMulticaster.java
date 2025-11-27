@@ -9,9 +9,5 @@ public interface ApplicationEventMulticaster {
 
     void removeApplicationListener(ApplicationListener<?> listener);
 
-    /**
-     * 传播/发送 事件
-     * @param event
-     */
     void multicastEvent(ApplicationEvent event);
 }

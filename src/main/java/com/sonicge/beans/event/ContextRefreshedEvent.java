@@ -1,9 +1,9 @@
 package com.sonicge.beans.event;
 
-import com.sonicge.beans.context.ApplicationContext;
+import com.sonicge.beans.context.ApplicationEvent;
 
-public class ContextRefreshedEvent extends ApplicationContextEvent{
-    public ContextRefreshedEvent(ApplicationContext source) {
+public class ContextRefreshedEvent extends ApplicationEvent {
+    public ContextRefreshedEvent(Object source) {
         super(source);
     }
 }
