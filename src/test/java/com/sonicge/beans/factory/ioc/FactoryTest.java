@@ -5,7 +5,7 @@ import com.sonicge.beans.factory.ioc.bean.Car;
 import com.sonicge.beans.support.ClassPathXmlApplicationContext;
 import org.junit.Test;
 
-import java.net.CacheRequest;
+
 
 public class FactoryTest {
     @Test
