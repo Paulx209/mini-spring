@@ -4,11 +4,22 @@ package com.sonicge.aop;
 import org.aopalliance.intercept.MethodInterceptor;
 
 public class AdvicedSupport {
-     private TargetSource targetSource;
+    //是否使用cglib代理,默认使用jdk动态代理
+    private boolean proxyTargetClass = false;
 
-     private MethodInterceptor methodInterceptor;
+    public boolean isProxyTargetClass() {
+        return proxyTargetClass;
+    }
 
-     private MethodMatcher methodMatcher;
+    public void setProxyTargetClass(boolean proxyTargetClass) {
+        this.proxyTargetClass = proxyTargetClass;
+    }
+
+    private TargetSource targetSource;
+
+    private MethodInterceptor methodInterceptor;
+
+    private MethodMatcher methodMatcher;
 
     public TargetSource getTargetSource() {
         return targetSource;
