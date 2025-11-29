@@ -7,9 +7,15 @@ public class TargetSource {
         this.target = target;
     }
 
-    public Class<?> getTargetClasses() {
-        return target.getClass();
+    public Class<?>[] getTargetClasses() {
+        return target.getClass().getInterfaces();
     }
+
+    public ClassLoader getClassLoader(){
+        return target.getClass().getClassLoader();
+    }
+
+
 
     public Object getTarget() {
         return target;
