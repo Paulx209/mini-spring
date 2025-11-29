@@ -7,6 +7,8 @@ import com.sonicge.aop.aspectj.AspectJExpressionPointcut;
 import com.sonicge.aop.framework.CglibAopProxy;
 import com.sonicge.aop.framework.JdkDynamicAopProxy;
 import com.sonicge.aop.framework.ProxyFactory;
+import com.sonicge.aop.GenericInterceptor;
+import com.sonicge.beans.factory.common.WorldServiceBeforeService;
 import com.sonicge.beans.factory.common.WorldServiceInterceptor;
 import com.sonicge.beans.factory.service.WorldService;
 import com.sonicge.beans.factory.service.WorldServiceImpl;
@@ -100,6 +102,25 @@ public class DynamicProxyTest {
         ProxyFactory proxyFactory2 = new ProxyFactory(advicedSupport);
         WorldService service2= (WorldService) proxyFactory2.getProxy();
         service2.explode();
+
+    }
+
+    @Test
+    public void testBeforeAdvice(){
+
+        WorldServiceBeforeService beforeAdviceService = new WorldServiceBeforeService();
+        //这个东西是主要的增强方法，其中主要是invoke()方法里面执行的内容
+        GenericInterceptor beforeAdviceInterceptor = new GenericInterceptor();
+
+        WorldService  worldService = new WorldServiceImpl();
+        AdvicedSupport advicedSupport = new AdvicedSupport();
+        advicedSupport.setTargetSource(new TargetSource(worldService));
+        advicedSupport.setMethodMatcher(new AspectJExpressionPointcut("execution(* com.sonicge.beans.factory.service..*(..))"));
+        advicedSupport.setMethodInterceptor(beforeAdviceInterceptor);
+
+        ProxyFactory proxyFactory = new ProxyFactory(advicedSupport);
+        WorldService service = (WorldService) proxyFactory.getProxy();
+        service.explode();
 
     }
 }
