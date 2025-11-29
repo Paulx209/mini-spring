@@ -18,7 +18,7 @@ public class CglibAopProxy implements AopProxy {
     @Override
     public Object getProxy() {
         Enhancer enhancer = new Enhancer();
-        enhancer.setSuperclass(advicedSupport.getTargetSource().getClass());
+        enhancer.setSuperclass(advicedSupport.getTargetSource().getTarget().getClass());
         enhancer.setInterfaces(advicedSupport.getTargetSource().getTargetClasses());
         enhancer.setCallback(new DynamicAdvisedInterceptor(advicedSupport));
 
@@ -34,10 +34,10 @@ public class CglibAopProxy implements AopProxy {
         }
 
         @Override
-        public Object intercept(Object target, Method method, Object[] arguments, MethodProxy methodProxy) throws Throwable {
-            CglibMethodInvocation cglibMethodInvocation = new CglibMethodInvocation(target, method, arguments, methodProxy);
+        public Object intercept(Object proxy, Method method, Object[] arguments, MethodProxy methodProxy) throws Throwable {
+            CglibMethodInvocation cglibMethodInvocation = new CglibMethodInvocation(advicedSupport.getTargetSource().getTarget(), method, arguments, methodProxy);
             //判断当前代理的方法是否和expression表达式相符合！
-            if(advicedSupport.getMethodMatcher().matches(method,advicedSupport.getTargetSource().getClass())){
+            if(advicedSupport.getMethodMatcher().matches(method,advicedSupport.getTargetSource().getTarget().getClass())){
                 //代理方法
                 return advicedSupport.getMethodInterceptor().invoke(cglibMethodInvocation);
             }
@@ -56,7 +56,7 @@ public class CglibAopProxy implements AopProxy {
         @Override
         public Object proceed() throws Throwable{
             //其实这串代码就类似于  this.method.invoke(this.target,this.arguments); 只是拿MethodProxy封装起来了
-            return this.methodProxy.invoke(this.target,this.getArguments());
+            return methodProxy.invoke(this.target,this.getArguments());
         }
     }
 }
