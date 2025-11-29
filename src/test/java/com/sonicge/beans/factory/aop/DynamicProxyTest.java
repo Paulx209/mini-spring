@@ -6,6 +6,7 @@ import com.sonicge.aop.TargetSource;
 import com.sonicge.aop.aspectj.AspectJExpressionPointcut;
 import com.sonicge.aop.framework.CglibAopProxy;
 import com.sonicge.aop.framework.JdkDynamicAopProxy;
+import com.sonicge.aop.framework.ProxyFactory;
 import com.sonicge.beans.factory.common.WorldServiceInterceptor;
 import com.sonicge.beans.factory.service.WorldService;
 import com.sonicge.beans.factory.service.WorldServiceImpl;
@@ -66,5 +67,39 @@ public class DynamicProxyTest {
 
         WorldServiceImpl proxy = (WorldServiceImpl) new CglibAopProxy(advicedSupport).getProxy();
         proxy.explode();
+    }
+
+    @Test
+    public void testProxyFactory(){
+        //使用动态代理
+
+        //创建worldService类，构建targetSource类
+        WorldService worldService = new WorldServiceImpl();
+        TargetSource targetSource = new TargetSource(worldService);
+
+        //构建MethodInterceptor类
+        WorldServiceInterceptor worldServiceInterceptor = new WorldServiceInterceptor();
+
+        //构建MethodMatcher类  -> AspectJExpressionPointcut
+        MethodMatcher methodMatcher = new AspectJExpressionPointcut("execution(* com.sonicge.beans.factory.service..*(..))").getMethodMatcher();
+
+        //创建AdvicedSupport类
+        AdvicedSupport advicedSupport = new AdvicedSupport();
+        advicedSupport.setTargetSource(targetSource);
+        advicedSupport.setMethodInterceptor(worldServiceInterceptor);
+        advicedSupport.setMethodMatcher(methodMatcher);
+
+        advicedSupport.setProxyTargetClass(false);
+
+        ProxyFactory proxyFactory1 = new ProxyFactory(advicedSupport);
+        WorldService service1= (WorldService) proxyFactory1.getProxy();
+        service1.explode();
+
+
+        advicedSupport.setProxyTargetClass(true);
+        ProxyFactory proxyFactory2 = new ProxyFactory(advicedSupport);
+        WorldService service2= (WorldService) proxyFactory2.getProxy();
+        service2.explode();
+
     }
 }
