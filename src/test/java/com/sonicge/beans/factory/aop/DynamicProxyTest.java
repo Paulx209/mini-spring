@@ -1,17 +1,18 @@
 package com.sonicge.beans.factory.aop;
 
-import com.sonicge.aop.AdvicedSupport;
-import com.sonicge.aop.MethodMatcher;
-import com.sonicge.aop.TargetSource;
+import com.sonicge.aop.*;
 import com.sonicge.aop.aspectj.AspectJExpressionPointcut;
+import com.sonicge.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import com.sonicge.aop.framework.CglibAopProxy;
 import com.sonicge.aop.framework.JdkDynamicAopProxy;
 import com.sonicge.aop.framework.ProxyFactory;
-import com.sonicge.aop.GenericInterceptor;
 import com.sonicge.beans.factory.common.*;
 import com.sonicge.beans.factory.service.WorldService;
 import com.sonicge.beans.factory.service.WorldServiceImpl;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.Test;
+
+import java.lang.annotation.Target;
 
 public class DynamicProxyTest {
 
@@ -71,7 +72,7 @@ public class DynamicProxyTest {
     }
 
     @Test
-    public void testProxyFactory(){
+    public void testProxyFactory() {
         //使用动态代理
 
         //创建worldService类，构建targetSource类
@@ -93,19 +94,19 @@ public class DynamicProxyTest {
         advicedSupport.setProxyTargetClass(false);
 
         ProxyFactory proxyFactory1 = new ProxyFactory(advicedSupport);
-        WorldService service1= (WorldService) proxyFactory1.getProxy();
+        WorldService service1 = (WorldService) proxyFactory1.getProxy();
         service1.explode();
 
 
         advicedSupport.setProxyTargetClass(true);
         ProxyFactory proxyFactory2 = new ProxyFactory(advicedSupport);
-        WorldService service2= (WorldService) proxyFactory2.getProxy();
+        WorldService service2 = (WorldService) proxyFactory2.getProxy();
         service2.explode();
 
     }
 
     @Test
-    public void testBeforeAdvice(){
+    public void testBeforeAdvice() {
 
         WorldServiceBeforeService beforeAdviceService = new WorldServiceBeforeService();
         AfterService afterService = new AfterService();
@@ -120,7 +121,7 @@ public class DynamicProxyTest {
         adviceInterceptor.setAfterThrowingAdvice(afterThrowingService);
         adviceInterceptor.setAfterReturningAdvice(afterReturningService);
 
-        WorldService  worldService = new WorldServiceImpl();
+        WorldService worldService = new WorldServiceImpl();
         AdvicedSupport advicedSupport = new AdvicedSupport();
         advicedSupport.setTargetSource(new TargetSource(worldService));
         advicedSupport.setMethodMatcher(new AspectJExpressionPointcut("execution(* com.sonicge.beans.factory.service..*(..))"));
@@ -129,6 +130,42 @@ public class DynamicProxyTest {
         ProxyFactory proxyFactory = new ProxyFactory(advicedSupport);
         WorldService service = (WorldService) proxyFactory.getProxy();
         service.explode();
+    }
+
+    @Test
+    public void tesAdvisor() {
+        WorldServiceBeforeService beforeAdviceService = new WorldServiceBeforeService();
+        AfterService afterService = new AfterService();
+        AroundService aroundService = new AroundService();
+        AfterThrowingService afterThrowingService = new AfterThrowingService();
+        AfterReturningService afterReturningService = new AfterReturningService();
+        //这个东西是主要的增强方法，其中主要是invoke()方法里面执行的内容
+        GenericInterceptor adviceInterceptor = new GenericInterceptor();
+        adviceInterceptor.setBeforeAdvice(beforeAdviceService);
+        adviceInterceptor.setAfterAdvice(afterService);
+        adviceInterceptor.setAroundAdvice(aroundService);
+        adviceInterceptor.setAfterThrowingAdvice(afterThrowingService);
+        adviceInterceptor.setAfterReturningAdvice(afterReturningService);
+
+
+        AspectJExpressionPointcutAdvisor advisor = new AspectJExpressionPointcutAdvisor();
+        String expression = "execution(* com.sonicge.beans.factory.service..*(..))";
+        advisor.setAdvice(adviceInterceptor);
+        advisor.setExpression(expression);
+
+        ClassFilter classFilter = advisor.getPointcut().getClassFilter();
+        if (classFilter.matches(WorldService.class)) {
+            //如果匹配的话
+            AdvicedSupport support = new AdvicedSupport();
+            support.setTargetSource(new TargetSource(new WorldServiceImpl()));
+            support.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
+            support.setMethodInterceptor((MethodInterceptor) advisor.getAdvice());
+
+            WorldService  service = (WorldService ) new ProxyFactory(support).getProxy();
+            service.explode();
+        }
+
+
     }
 
 }
