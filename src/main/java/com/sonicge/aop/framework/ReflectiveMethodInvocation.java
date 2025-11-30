@@ -4,7 +4,6 @@ import org.aopalliance.intercept.MethodInvocation;
 
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
-import java.sql.Ref;
 
 public class ReflectiveMethodInvocation implements MethodInvocation {
     protected final Object target;

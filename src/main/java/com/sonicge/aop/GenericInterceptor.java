@@ -48,7 +48,7 @@ public class GenericInterceptor implements MethodInterceptor {
             if (afterThrowingAdvice != null) {
                 afterThrowingAdvice.afterThrowing(target, method, arguments);
             }
-            //Around的后置 (抛出异常也会执行..)
+            //Around的后置 (发生异常后是否执行看具体场景)
             if (aroundAdvice != null) {
                 aroundAdvice.afterOfAround(target, method, arguments);
             }
@@ -81,5 +81,7 @@ public class GenericInterceptor implements MethodInterceptor {
     public void setAfterThrowingAdvice(AfterThrowingAdvice afterThrowingAdvice) {
         this.afterThrowingAdvice = afterThrowingAdvice;
     }
-
+    public void setAroundAdvice(AroundAdvice aroundAdvice) {
+        this.aroundAdvice = aroundAdvice;
+    }
 }
