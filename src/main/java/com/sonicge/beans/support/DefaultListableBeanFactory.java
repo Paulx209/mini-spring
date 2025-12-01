@@ -70,7 +70,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
     @Override
     public void preInstantiateSingletons() throws BeansException {
-        //name  beanDefinitio
+        //name  beanDefinition
         beanDefinitionMap.entrySet().stream().forEach(entry -> {
             if (entry.getValue().isSingleton()) {
                 getBean(entry.getKey());

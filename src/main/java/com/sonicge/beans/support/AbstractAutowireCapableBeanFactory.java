@@ -6,10 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.sonicge.beans.BeansException;
 import com.sonicge.beans.PropertyValue;
-import com.sonicge.beans.config.AutowireCapableBeanFactory;
-import com.sonicge.beans.config.BeanDefinition;
-import com.sonicge.beans.config.BeanPostProcessor;
-import com.sonicge.beans.config.BeanReference;
+import com.sonicge.beans.config.*;
 import com.sonicge.beans.factory.BeanFactory;
 import com.sonicge.beans.factory.BeanFactoryAware;
 import com.sonicge.beans.factory.DisposableBean;
@@ -29,7 +26,36 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     @Override
     protected Object createBean(String beanName, BeanDefinition beanDefinition) throws BeansException {
+        //如果Bean需要代理的话，则直接返回代理对象
+        Object bean = resolveBeforeInstantiation(beanName, beanDefinition);
+        if (bean != null) {
+            return bean;
+        }
+        //如果不需要代理的话，走普通路线
         return doCreateBean(beanName, beanDefinition);
+    }
+
+    protected Object resolveBeforeInstantiation(String beanName,BeanDefinition beanDefinition){
+        Class beanClass = beanDefinition.getBeanClass();
+        Object proxyInstance = applyBeanPostProcessorsBeforeInitialization(beanClass, beanName);
+        if(proxyInstance != null){
+            applyBeanPostProcessorAfterInitialization(proxyInstance,beanName);
+        }
+        return proxyInstance;
+    }
+
+    protected Object applyBeanPostProcessorsBeforeInitialization(Class beanClass , String beanName){
+        List<BeanPostProcessor> beanPostProcessors = getBeanPostProcessors();
+        for(BeanPostProcessor beanPostProcessor : beanPostProcessors){
+            if(beanPostProcessor instanceof InstantiationAwareBeanPostProcessor){
+                //如果注入了InstantiationAwareBeanPostProcessor类型的bean的话
+                Object proxyInstance = ((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessBeforeInstantiation(beanClass, beanName);
+                if(proxyInstance != null){
+                    return proxyInstance;
+                }
+            }
+        }
+        return null;
     }
 
     protected Object doCreateBean(String beanName, BeanDefinition beanDefinition) {
@@ -45,19 +71,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             throw new BeansException("类的实例化失败...", e);
         }
 
-        registerDisposableBeanIfNecessary(beanName,bean,beanDefinition);
+        registerDisposableBeanIfNecessary(beanName, bean, beanDefinition);
 
         //只有bean设置为单例属性，才添加到单例singletonMap中
-        if(beanDefinition.isSingleton()){
+        if (beanDefinition.isSingleton()) {
             addSingleton(beanName, bean);
         }
         return bean;
     }
 
-    protected void registerDisposableBeanIfNecessary(String beanName,Object bean,BeanDefinition beanDefinition){
-        if(beanDefinition.isSingleton()){
-            if(bean instanceof DisposableBean || StrUtil.isNotEmpty(beanDefinition.getDestroyMethodName())){
-                registerDisposableBean(beanName,new DisposableBeanAdapter(bean,beanName,beanDefinition));
+    protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
+        if (beanDefinition.isSingleton()) {
+            if (bean instanceof DisposableBean || StrUtil.isNotEmpty(beanDefinition.getDestroyMethodName())) {
+                registerDisposableBean(beanName, new DisposableBeanAdapter(bean, beanName, beanDefinition));
             }
         }
     }
@@ -89,7 +115,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     protected Object initializeBean(String beanName, Object bean, BeanDefinition beanDefinition) throws Exception {
-        if(bean instanceof BeanFactoryAware){
+        if (bean instanceof BeanFactoryAware) {
             ((BeanFactoryAware) bean).setBeanFactory(this);
         }
 
@@ -145,14 +171,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      */
     private void invokeInitMethods(String beanName, Object bean, BeanDefinition beanDefinition) throws Exception {
         //1.先执行InitializingBean接口下的afterProperties方法
-        if (bean instanceof InitializingBean  ) {
+        if (bean instanceof InitializingBean) {
             //如果bean是InitializingBean接口的实现类的话。
             ((InitializingBean) bean).afterPropertiesSet();
         }
         //2.再执行自定义的init-method方法
         String initMethodName = beanDefinition.getInitMethodName();
         //避免重复调用afterPropertiesSet方法(如果bean属于InitializingBean接口的实现类，并且init-method属性的方法也是afterPropertiesSet方法的话，则不执行init-method方法)
-        if (StrUtil.isNotEmpty(initMethodName) && !(bean instanceof  InitializingBean && (initMethodName . equals("afterPropertiesSet")))) {
+        if (StrUtil.isNotEmpty(initMethodName) && !(bean instanceof InitializingBean && (initMethodName.equals("afterPropertiesSet")))) {
             Method initMethod = ClassUtil.getPublicMethod(beanDefinition.getBeanClass(), initMethodName);
             if (initMethod == null) {
                 throw new BeansException("Could not find an init method named '" + initMethodName + "' on bean with name '" + beanName + "'");
