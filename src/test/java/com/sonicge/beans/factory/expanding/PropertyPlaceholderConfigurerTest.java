@@ -12,6 +12,7 @@ public class PropertyPlaceholderConfigurerTest {
         ApplicationContext context = new ClassPathXmlApplicationContext("classpath:property-placeholder-configurer.xml");
 
         Car car = (Car) context.getBean("car");
-        System.out.println(car);
+        String brand = car.getBrand();
+        System.out.println(brand);
     }
 }
