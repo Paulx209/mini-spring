@@ -1,5 +1,8 @@
 package com.sonicge.beans.factory.aop.bean;
 
+import com.sonicge.stereotype.Component;
+
+@Component
 public class Car {
     private String brand;
 
