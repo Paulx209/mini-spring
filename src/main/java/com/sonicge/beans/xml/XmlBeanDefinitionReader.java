@@ -8,8 +8,10 @@ import com.sonicge.beans.config.BeanDefinition;
 import com.sonicge.beans.config.BeanReference;
 import com.sonicge.beans.support.AbstractBeanDefinitionReader;
 import com.sonicge.beans.support.BeanDefinitionRegistry;
+import com.sonicge.context.annotation.ClassPathBeanDefinitionScanner;
 import com.sonicge.core.io.Resource;
 import com.sonicge.core.io.ResourceLoader;
+import com.sonicge.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -29,6 +31,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     public static final String INIT_METHOD_ATTRIBUTE = "init-method";
     public static final String DESTROY_METHOD_ATTRIBUTE = "destroy-method";
     public static final String SCOPE_ATTRIBUTE = "scope";
+
+    public static final String BASE_PACKAGE_ATTRIBUTE = "base-package";
+    public static final String COMPONENT_SCAN_ATTRIBUTE = "context:component-scan";
 
     public XmlBeanDefinitionReader(BeanDefinitionRegistry registry) {
         super(registry);
@@ -60,12 +65,21 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
         Document document = XmlUtil.readXML(inputStream);
         //<beans>标签
         Element root = document.getDocumentElement();
+
         //<bean>标签
         NodeList childNodes = root.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             if (childNodes.item(i) instanceof Element) {
-                System.out.println("标签的名称为：" + childNodes.item(i).getNodeName());
-                if (BEAN_ATTRIBUTE.equals(childNodes.item(i).getNodeName())) {
+                String nodeName = childNodes.item(i).getNodeName();
+                System.out.println("标签的名称为：" + nodeName);
+                if (COMPONENT_SCAN_ATTRIBUTE.equals(nodeName)) {
+                    Element componentScan = (Element) childNodes.item(i);
+                    String basePackage = componentScan.getAttribute(BASE_PACKAGE_ATTRIBUTE);
+                    if (StrUtil.isEmpty(basePackage)) {
+                        throw new BeansException("The value of base-package attribute can not be empty or null");
+                    }
+                    scanPackage(basePackage);
+                } else if (BEAN_ATTRIBUTE.equals(nodeName)) {
                     //解析Bean标签
                     try {
                         Element bean = (Element) childNodes.item(i);
@@ -89,17 +103,17 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
                         beanDefinition.setInitMethodName(initMethodName);
                         beanDefinition.setDestroyMethodName(destroyMethodName);
 
-                        if(StrUtil.isNotEmpty(scope)){
+                        if (StrUtil.isNotEmpty(scope)) {
                             beanDefinition.setScope(scope);
                         }
-                        if(scope.equals(BeanDefinition.SCOPE_PROTOTYPE)){
+                        if (scope.equals(BeanDefinition.SCOPE_PROTOTYPE)) {
                             //如果是多实例的话
                             beanDefinition.setSingleton(false);
                             beanDefinition.setPrototype(true);
                         }
 
-                            //开始遍历bean标签中的子标签
-                            NodeList beanChildNodes = bean.getChildNodes();
+                        //开始遍历bean标签中的子标签
+                        NodeList beanChildNodes = bean.getChildNodes();
                         for (int j = 0; j < beanChildNodes.getLength(); j++) {
                             if (PROPERTY_ATTRIBUTE.equals(beanChildNodes.item(j).getNodeName())) {
                                 //开始解析property标签
@@ -125,4 +139,11 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
             }
         }
     }
+
+    private void scanPackage(String basePackage){
+        String[] basePackages = StrUtil.splitToArray(basePackage, ',');
+        ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(getRegistry());
+        scanner.scan(basePackages);
+    }
+
 }
