@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+<!--    目标类-->
+    <bean id="worldService" class="com.sonicge.beans.factory.service.WorldServiceImpl"/>
+
+<!--    创建目标类的代理对象 -->
+    <bean class="com.sonicge.aop.framework.autoProxy.DefaultAdvisorAutoProxyCreator"/>
+
+<!--    advice 和 pointcut的集合体 -->
+    <bean id="pointcutAdvisor" class="com.sonicge.aop.aspectj.AspectJExpressionPointcutAdvisor">
+        <property name="expression" value="execution(* com.sonicge.beans.factory.service.WorldService.*(..))"/>
+        <property name="advice" ref="genericInterceptor"/>
+    </bean>
+
+<!--    增强-->
+    <bean id="genericInterceptor" class="com.sonicge.aop.GenericInterceptor">
+        <property name="beforeAdvice" ref="worldServiceBeforeService"/>
+    </bean>
+
+    <!--    before增强-->
+    <bean id="worldServiceBeforeService" class="com.sonicge.beans.factory.common.WorldServiceBeforeService"/>
+</beans>

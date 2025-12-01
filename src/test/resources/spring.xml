@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-	         http://www.springframework.org/schema/beans/spring-beans.xsd
-		 http://www.springframework.org/schema/context
-		 http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+	         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="car" class="com.sonicge.beans.factory.ioc.bean.Car">
         <property name="brand" value="Benz"/>
@@ -18,9 +15,21 @@
         <property name="car" ref="car" />
     </bean>
 
-<!--    <bean id="customBeanFactoryPostProcessor" class="com.sonicge.beans.factory.ioc.common.CustomBeanFactoryPostProcessor"/>-->
+    <bean id="customBeanFactoryPostProcessor" class="com.sonicge.beans.factory.ioc.common.CustomBeanFactoryPostProcessor"/>
 
-<!--    <bean id="customerBeanPostProcessor" class="com.sonicge.beans.factory.ioc.common.CustomerBeanPostProcessor"/>-->
+    <bean id="customerBeanPostProcessor" class="com.sonicge.beans.factory.ioc.common.CustomerBeanPostProcessor"/>
+
 
     <bean id="helloService" class="com.sonicge.beans.factory.ioc.bean.service.HelloService"/>
+
+    <bean class="com.sonicge.beans.factory.ioc.common.event.ContextRefreshedEventListener"/>
+
+    <bean class="com.sonicge.beans.factory.ioc.common.event.CustomEventListener"/>
+
+    <bean class="com.sonicge.beans.factory.ioc.common.event.ContextClosedEventListener"/>
+
+    <bean id="car1" class="com.sonicge.beans.factory.ioc.bean.Car" scope="prototype">
+        <property name="brand" value="porsche"/>
+    </bean>
+
 </beans>
