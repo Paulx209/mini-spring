@@ -2,6 +2,8 @@ package com.sonicge.beans.config;
 
 import com.sonicge.beans.PropertyValues;
 
+import java.util.Objects;
+
 /**
  * BeanDefinition实例保存Bean的信息，包括class信息、方法构造参数、是否为单例等。此处简化只包含class类型。
  */
@@ -98,7 +100,7 @@ public class BeanDefinition {
         this.scope = scope;
     }
 
-    public void setSingleton(boolean singleton){
+    public void setSingleton(boolean singleton) {
         this.singleton = singleton;
     }
 
@@ -106,7 +108,7 @@ public class BeanDefinition {
         return singleton;
     }
 
-    public void setPrototype(boolean prototype){
+    public void setPrototype(boolean prototype) {
         this.prototype = prototype;
     }
 
@@ -114,4 +116,21 @@ public class BeanDefinition {
         return prototype;
     }
 
+    @Override
+    public boolean equals(Object bean) {
+        //1.如果地址相同的话
+        if (this == bean) return true;
+        //2.如果bean == null 或者 class不相同
+        if (bean == null || bean.getClass() != getClass()) {
+            return false;
+        }
+        //3.类型相同的话
+        BeanDefinition that = (BeanDefinition) bean;
+        return beanClass.equals(that.beanClass);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(beanClass);
+    }
 }
