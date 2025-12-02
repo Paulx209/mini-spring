@@ -1,6 +1,7 @@
 package com.sonicge.beans.config;
 
 import com.sonicge.beans.BeansException;
+import com.sonicge.beans.PropertyValues;
 
 public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor{
 
@@ -12,4 +13,6 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor{
      * @throws BeansException 异常处理
      */
     Object postProcessBeforeInstantiation(Class<?> beanClass,String beanName) throws BeansException;
+
+    PropertyValues postProcessPropertyValues(PropertyValues pvs,Object bean,String beanName);
 }

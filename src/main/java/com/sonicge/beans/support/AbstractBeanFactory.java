@@ -1,13 +1,11 @@
 package com.sonicge.beans.support;
 
-import cn.hutool.json.JSONObject;
 import com.sonicge.beans.BeansException;
 import com.sonicge.beans.config.BeanDefinition;
 import com.sonicge.beans.config.BeanPostProcessor;
 import com.sonicge.beans.config.ConfigurableBeanFactory;
-import com.sonicge.beans.factory.BeanFactory;
 import com.sonicge.beans.factory.FactoryBean;
-import net.sf.cglib.proxy.Factory;
+import com.sonicge.util.StringValueResolver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +17,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>();
 
     private final Map<String, Object> factoryBeanObjectCache = new HashMap<>();
+
+    private final List<StringValueResolver> embeddedValueResolvers = new ArrayList<StringValueResolver>();
 
     @Override
     public Object getBean(String name) throws BeansException {
@@ -74,8 +74,23 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         this.beanPostProcessors.add(beanPostProcessor);
     }
 
+
     public List<BeanPostProcessor> getBeanPostProcessors() {
         return this.beanPostProcessors;
+    }
+
+    @Override
+    public void addEmbeddedValueResolver(StringValueResolver valueResolver) {
+        this.embeddedValueResolvers.add(valueResolver);
+    }
+
+    @Override
+    public String resolveEmbeddedValue(String value) {
+        String result = value;
+        for(StringValueResolver valueResolver : this.embeddedValueResolvers){
+            result =valueResolver.resolveStringValue(result);
+        }
+        return result;
     }
 
     protected abstract Object createBean(String beanName, BeanDefinition beanDefinition) throws BeansException;

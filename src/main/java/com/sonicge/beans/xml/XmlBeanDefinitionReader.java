@@ -11,7 +11,6 @@ import com.sonicge.beans.support.BeanDefinitionRegistry;
 import com.sonicge.context.annotation.ClassPathBeanDefinitionScanner;
 import com.sonicge.core.io.Resource;
 import com.sonicge.core.io.ResourceLoader;
-import com.sonicge.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

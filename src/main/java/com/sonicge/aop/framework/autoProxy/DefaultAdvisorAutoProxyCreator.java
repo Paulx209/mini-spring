@@ -4,6 +4,7 @@ import com.sonicge.aop.*;
 import com.sonicge.aop.aspectj.AspectJExpressionPointcutAdvisor;
 import com.sonicge.aop.framework.ProxyFactory;
 import com.sonicge.beans.BeansException;
+import com.sonicge.beans.PropertyValues;
 import com.sonicge.beans.config.BeanDefinition;
 import com.sonicge.beans.config.InstantiationAwareBeanPostProcessor;
 import com.sonicge.beans.factory.BeanFactory;
@@ -58,6 +59,11 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
         return Advice.class.isAssignableFrom(beanClass)
                 || PointCut.class.isAssignableFrom(beanClass)
                 || Advisor.class.isAssignableFrom(beanClass);
+    }
+
+    @Override
+    public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName) {
+        return pvs;
     }
 
     @Override

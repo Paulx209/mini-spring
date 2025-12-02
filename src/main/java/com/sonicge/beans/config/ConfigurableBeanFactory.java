@@ -1,6 +1,7 @@
 package com.sonicge.beans.config;
 
 import com.sonicge.beans.factory.HierarchicalBeanFactory;
+import com.sonicge.util.StringValueResolver;
 
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory,SingletonBeanRegistry{
 
@@ -14,4 +15,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory,Singlet
      * 销毁单例bean
      */
     void destroySingletons();
+
+    void addEmbeddedValueResolver(StringValueResolver valueResolver);
+
+    String resolveEmbeddedValue(String value);
 }
