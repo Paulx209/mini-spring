@@ -1,13 +1,16 @@
 package com.sonicge.context.annotation;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ClassUtil;
 import com.sonicge.beans.BeansException;
 import com.sonicge.beans.PropertyValues;
 import com.sonicge.beans.config.InstantiationAwareBeanPostProcessor;
 import com.sonicge.beans.factory.BeanFactory;
 import com.sonicge.beans.factory.BeanFactoryAware;
 import com.sonicge.beans.factory.ConfigurableListableBeanFactory;
+import org.dom4j.util.StringUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
@@ -20,20 +23,37 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
 
     @Override
     public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName) {
-        //处理@Value注解,这个注解是在属性上面添加的，而不是在类上
+        //处理@Value注解,这个注解是在属性上面添加的，用来处理简单类型的属性
         Class<?> clazz = bean.getClass();
         Field[] declaredFields = clazz.getDeclaredFields();
-        for(Field field : declaredFields){
+        for (Field field : declaredFields) {
             //遍历所有的属性，判断是否添加了Value注解
             Value annotation = field.getAnnotation(Value.class);
-            if(annotation != null){
+            if (annotation != null) {
                 String value = annotation.value();
                 value = beanFactory.resolveEmbeddedValue(value);
-                BeanUtil.setFieldValue(bean,field.getName(),value);
+                BeanUtil.setFieldValue(bean, field.getName(), value);
             }
         }
 
-        //todo 处理Autowired注解
+        //todo 处理Autowired注解 也是在属性上 一般是用来处理ref类型的
+        for (Field field : declaredFields) {
+            String refBeanName = null;
+            Object targetBean = null;
+            Autowired autowired = field.getAnnotation(Autowired.class);
+            if (autowired != null) {
+                Class<?> fieldType = field.getType();
+                Qualifier qualifier = field.getAnnotation(Qualifier.class);
+                if (qualifier != null) {
+                    refBeanName = qualifier.value();
+                    targetBean = beanFactory.getBean(refBeanName, fieldType);
+                } else {
+                    targetBean = beanFactory.getBean(fieldType);
+                }
+                BeanUtil.setFieldValue(bean, field.getName(), targetBean);
+            }
+        }
+
 
         return pvs;
     }

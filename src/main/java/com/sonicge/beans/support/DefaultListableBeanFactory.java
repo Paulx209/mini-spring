@@ -4,9 +4,7 @@ import com.sonicge.beans.BeansException;
 import com.sonicge.beans.config.BeanDefinition;
 import com.sonicge.beans.factory.ConfigurableListableBeanFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements BeanDefinitionRegistry, ConfigurableListableBeanFactory {
 
@@ -59,6 +57,25 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             }
         });
         return result;
+    }
+
+    @Override
+    public <T> T getBean(Class<T> requiredType) throws BeansException {
+        List<String> beanNames = new ArrayList<>();
+        for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
+            BeanDefinition beanDefinition = entry.getValue();
+            Class beanClass = beanDefinition.getBeanClass();
+            if (requiredType.isAssignableFrom(beanClass)) {
+                //如果类型符合的话
+                beanNames.add(entry.getKey());
+            }
+        }
+        if (beanNames.size() == 1) {
+            return getBean(beanNames.get(0), requiredType);
+        }
+
+        throw new BeansException(requiredType + "expected single bean but found " +
+                beanNames.size() + ": " + beanNames);
     }
 
 
