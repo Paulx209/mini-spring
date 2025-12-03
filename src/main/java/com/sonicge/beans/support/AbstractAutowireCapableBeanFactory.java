@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.sonicge.beans.BeansException;
 import com.sonicge.beans.PropertyValue;
+import com.sonicge.beans.PropertyValues;
 import com.sonicge.beans.config.*;
 import com.sonicge.beans.factory.BeanFactory;
 import com.sonicge.beans.factory.BeanFactoryAware;
@@ -63,6 +64,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         try {
             //1.实例化bean
             bean = createBeanInstance(beanDefinition);
+            //在设置属性之前，允许BeanPostProcessor修改属性值
+            applyBeanPostprocessorsBeforeApplyingPropertyValues(beanName,bean,beanDefinition);
             //2.为bean填充属性  （这里类似于执行bean的生命周期）
             applyPropertyValues(beanName, bean, beanDefinition);
             //3.执行bean的初始化方法和BeanPostProcessor的前置和后置处理方法
@@ -79,6 +82,26 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
         return bean;
     }
+
+    /**
+     * 在设置bean属性之前，允许BeanPostProcessor修改属性值
+     * @param beanName
+     * @param bean
+     * @param beanDefinition
+     */
+    private void applyBeanPostprocessorsBeforeApplyingPropertyValues(String beanName, Object bean, BeanDefinition beanDefinition) {
+        for(BeanPostProcessor beanPostProcessor: getBeanPostProcessors()){
+            if(beanPostProcessor instanceof  InstantiationAwareBeanPostProcessor){
+                PropertyValues propertyValues = ((InstantiationAwareBeanPostProcessor) beanPostProcessor).postProcessPropertyValues(beanDefinition.getPropertyValues(), bean, beanName);
+                if(propertyValues != null){
+                    for(PropertyValue ps : propertyValues.getPropertyValues()){
+                        beanDefinition.getPropertyValues().addPropertyValue(ps);
+                    }
+                }
+            }
+        }
+    }
+
 
     protected void registerDisposableBeanIfNecessary(String beanName, Object bean, BeanDefinition beanDefinition) {
         if (beanDefinition.isSingleton()) {

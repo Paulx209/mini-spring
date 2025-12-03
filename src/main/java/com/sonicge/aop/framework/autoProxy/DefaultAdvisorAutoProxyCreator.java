@@ -36,7 +36,7 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
                 MethodMatcher methodMatcher = advisor.getPointcut().getMethodMatcher();
 
                 if (classFilter.matches(beanClass)) {
-                    //草，之前直接传了个Class对象，搞错了。。
+                    //草，之前直接传了个Class对象，搞错了。。 应该传递是Target的实例化对象
                     BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
                     Object bean = beanFactory.getInstantiationStrategy().instantiate(beanDefinition);
                     //如果当前的类是需要被代理的话
@@ -61,9 +61,16 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
                 || Advisor.class.isAssignableFrom(beanClass);
     }
 
+    /**
+     * 在实例化之后，applyProperties执行之前，执行！
+     * @param pvs
+     * @param bean
+     * @param beanName
+     * @return
+     */
     @Override
     public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName) {
-        return pvs;
+        return  pvs;
     }
 
     @Override

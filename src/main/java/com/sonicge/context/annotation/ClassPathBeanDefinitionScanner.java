@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateComponentProvider {
 
-    public static final String AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME = "com.sonicge.context.annotation.instantiationAwareBeanPostProcessor";
+    public static final String AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME = "com.sonicge.context.annotation.InstantiationAwareBeanPostProcessor";
 
     private BeanDefinitionRegistry registry;
 
@@ -42,7 +42,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
     }
 
     /**
-     * 获取Bean的作用域 scope吗？
+     * 获取Bean的作用域 scope
      * @param beanDefinition
      * @return
      */

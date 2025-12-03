@@ -39,7 +39,7 @@ public class PropertyPlaceholderConfigurer implements BeanFactoryPostProcessor {
     }
 
     /**
-     * 加载配置属性文件
+     * 将properties文件中的数据解析成Properties
      *
      * @return
      */
@@ -69,7 +69,6 @@ public class PropertyPlaceholderConfigurer implements BeanFactoryPostProcessor {
         for (PropertyValue propertyValue : propertyValues.getPropertyValues()) {
             Object value = propertyValue.getValue();
             if (value instanceof String) {
-                //Todo 仅支持一个简单的占位符格式
                 value = resolvePlaceholder((String) value,properties);
                 propertyValues.addPropertyValue(new PropertyValue(propertyValue.getName(), value));
             }
