@@ -2,7 +2,10 @@ package com.sonicge.beans.factory.aop.bean;
 
 import com.sonicge.beans.factory.DisposableBean;
 import com.sonicge.beans.factory.InitializingBean;
+import com.sonicge.context.annotation.Autowired;
+import com.sonicge.stereotype.Component;
 
+@Component
 public class People implements InitializingBean, DisposableBean {
     private String name;
 
@@ -10,6 +13,7 @@ public class People implements InitializingBean, DisposableBean {
 
     private Boolean isStudent;
 
+    @Autowired
     private Car car;
 
     public String getName() {
