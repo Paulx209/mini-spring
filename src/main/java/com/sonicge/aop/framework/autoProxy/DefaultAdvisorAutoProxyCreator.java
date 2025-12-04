@@ -20,11 +20,20 @@ import com.sonicge.aop.PointCut;
 public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
     private DefaultListableBeanFactory beanFactory;
 
+    /**
+     * 初始化之后执行
+     *
+     * @param bean
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
     @Override
-    public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        Class<?> beanClass = bean.getClass();
         //1.避免死循环
         if (isInfrastructureClass(beanClass)) {
-            return null;
+            return bean;
         }
         //2.获取AspectJExpressionPointcutAdvisor类
         Collection<AspectJExpressionPointcutAdvisor> aspectJExpressionPointcutAdvisors = beanFactory.getBeansOfType(AspectJExpressionPointcutAdvisor.class).values();
@@ -38,11 +47,11 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
                 if (classFilter.matches(beanClass)) {
                     //草，之前直接传了个Class对象，搞错了。。 应该传递是Target的实例化对象
                     BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-                    Object bean = beanFactory.getInstantiationStrategy().instantiate(beanDefinition);
+                    Object targetBean = beanFactory.getInstantiationStrategy().instantiate(beanDefinition);
                     //如果当前的类是需要被代理的话
                     AdvicedSupport advicedSupport = new AdvicedSupport();
                     advicedSupport.setMethodInterceptor(methodInterceptor);
-                    advicedSupport.setTargetSource(new TargetSource(bean));
+                    advicedSupport.setTargetSource(new TargetSource(targetBean));
                     advicedSupport.setMethodMatcher(methodMatcher);
 
                     ProxyFactory proxyFactory = new ProxyFactory(advicedSupport);
@@ -50,9 +59,9 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
                 }
             }
         } catch (Exception e) {
-            throw new BeansException("Error create proxy bean for: " +beanName,e);
+            throw new BeansException("Error create proxy bean for: " + beanName, e);
         }
-        return null;
+        return bean;
     }
 
     private boolean isInfrastructureClass(Class<?> beanClass) {
@@ -61,8 +70,15 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
                 || Advisor.class.isAssignableFrom(beanClass);
     }
 
+
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = (DefaultListableBeanFactory) beanFactory;
+    }
+
     /**
      * 在实例化之后，applyProperties执行之前，执行！
+     *
      * @param pvs
      * @param bean
      * @param beanName
@@ -70,21 +86,46 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
      */
     @Override
     public PropertyValues postProcessPropertyValues(PropertyValues pvs, Object bean, String beanName) {
-        return  pvs;
+        return pvs;
     }
 
+    /**
+     * 实例化之前执行
+     *
+     * @param beanClass bean名称
+     * @param beanName  beanName
+     * @return
+     * @throws BeansException
+     */
     @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = (DefaultListableBeanFactory) beanFactory;
+    public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+        return null;
     }
 
+    /**
+     * 实例化之后执行
+     *
+     * @param bean
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
+    @Override
+    public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+        return true;
+    }
+
+    /**
+     * 初始化之前执行
+     *
+     * @param bean
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         return bean;
     }
 
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
-    }
 }

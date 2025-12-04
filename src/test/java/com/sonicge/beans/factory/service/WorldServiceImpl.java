@@ -1,11 +1,21 @@
 package com.sonicge.beans.factory.service;
 
-import com.sonicge.beans.BeansException;
 
 public class WorldServiceImpl implements WorldService {
+
+    private String name;
+
     @Override
     public void explode() {
-        System.out.println("The earth is beautiful");
-        throw new BeansException("故意抛出的异常");
+        System.out.println("The name is " + name + "earth is beautiful");
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

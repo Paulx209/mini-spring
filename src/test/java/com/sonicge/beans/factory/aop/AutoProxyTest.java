@@ -31,6 +31,15 @@ public class AutoProxyTest {
         worldService.explode();
 
         //额外：记得验证这些代理类是否在singletonMap中
+    }
 
+    @Test
+    public void testPopulateProxyBeanWithPropertyValues() throws Exception{
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath:populate-proxy-bean-with-property-values.xml");
+
+        //获取代理对象
+        WorldService worldService = context.getBean("worldService", WorldService.class);
+        System.out.println(worldService);
+        worldService.explode();
     }
 }
