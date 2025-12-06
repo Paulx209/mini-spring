@@ -1,6 +1,7 @@
 package com.sonicge.beans.config;
 
 import com.sonicge.beans.factory.HierarchicalBeanFactory;
+import com.sonicge.core.convert.ConversionService;
 import com.sonicge.util.StringValueResolver;
 
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory,SingletonBeanRegistry{
@@ -19,4 +20,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory,Singlet
     void addEmbeddedValueResolver(StringValueResolver valueResolver);
 
     String resolveEmbeddedValue(String value);
+
+    void setConversionService(ConversionService conversionService);
+
+    ConversionService getConversionService();
 }

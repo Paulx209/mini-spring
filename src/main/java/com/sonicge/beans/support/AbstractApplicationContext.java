@@ -1,7 +1,9 @@
 package com.sonicge.beans.support;
+
 import com.sonicge.beans.BeansException;
 import com.sonicge.beans.config.BeanFactoryPostProcessor;
 import com.sonicge.beans.config.BeanPostProcessor;
+import com.sonicge.beans.config.ConfigurableBeanFactory;
 import com.sonicge.beans.context.ApplicationEvent;
 import com.sonicge.beans.context.ApplicationListener;
 import com.sonicge.beans.context.ConfigurableApplicationContext;
@@ -10,15 +12,19 @@ import com.sonicge.beans.event.ContextClosedEvent;
 import com.sonicge.beans.event.ContextRefreshedEvent;
 import com.sonicge.beans.event.SimpleApplicationEventMulticaster;
 import com.sonicge.beans.factory.ConfigurableListableBeanFactory;
+import com.sonicge.core.convert.ConversionService;
 import com.sonicge.core.io.DefaultResourceLoader;
 
 import java.util.Map;
 
 public abstract class AbstractApplicationContext extends DefaultResourceLoader implements ConfigurableApplicationContext {
 
-    public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME ="applicationEventMulticatser";
+    public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticatser";
+
+    public static final String CONVERSION_SERVICE_BEAN_NAME = "conversionService";
 
     private ApplicationEventMulticaster applicationEventMulticaster;
+
     @Override
     public void refresh() throws BeansException {
         //创建BeanFactory，并且加载BeanDefinition类
@@ -44,11 +50,28 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         registerListeners();
 
         //提前实例化单例Bean
-        beanFactory.preInstantiateSingletons();
+        finishBeanFactoryInitialization(beanFactory);
+//        beanFactory.preInstantiateSingletons();
 
 
         //发布容器刷新完成事件
         finishRefresh();
+    }
+
+    /**
+     * 完成容器的初始化
+     */
+    protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+        //设置类型转换器。由于我们的ConversionService会在创建BeanFactory的时候，发挥一些类型转换的作用，所以这个类要提前注入进去。
+        if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME)) {
+            //判断beanDefinitionMap中是否有这个beanDefinition
+            Object conversionService = beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME);
+            if (conversionService instanceof ConversionService) {
+                beanFactory.setConversionService((ConversionService) conversionService);
+            }
+        }
+        //提前实例化单例Bean
+        beanFactory.preInstantiateSingletons();
     }
 
     protected abstract void refreshBeanFactory() throws BeansException;
@@ -88,18 +111,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     /**
      * 初始化事件发布者
      */
-    protected void initApplicationEventMulticaster(){
+    protected void initApplicationEventMulticaster() {
         ConfigurableListableBeanFactory beanFactory = new DefaultListableBeanFactory();
         applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
-        beanFactory.addSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME,applicationEventMulticaster);
+        beanFactory.addSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, applicationEventMulticaster);
     }
 
     /**
      * 注册事件监听器
      */
-    protected  void registerListeners(){
+    protected void registerListeners() {
         Map<String, ApplicationListener> applicationListeners = getBeansOfType(ApplicationListener.class);
-        for(ApplicationListener applicationListener : applicationListeners.values()){
+        for (ApplicationListener applicationListener : applicationListeners.values()) {
             applicationEventMulticaster.addApplicationListener(applicationListener);
         }
     }
@@ -107,7 +130,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     /**
      * 发布容器刷新完成事件
      */
-    protected  void finishRefresh(){
+    protected void finishRefresh() {
         publishEvent(new ContextRefreshedEvent(this));
     }
 
@@ -124,6 +147,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     @Override
     public String[] getBeanDefinitionNames() {
         return getBeanFactory().getBeanDefinitionNames();
+    }
+
+
+    public boolean containsBean(String beanName) {
+        return getBeanFactory().containsBean(beanName);
     }
 
     @Override
@@ -146,19 +174,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         doClose();
     }
 
-    public void doClose(){
+    public void doClose() {
         publishEvent(new ContextClosedEvent(this));
 
         destroyBeans();
     }
-    public void destroyBeans(){
+
+    public void destroyBeans() {
         getBeanFactory().destroySingletons();
     }
 
     @Override
     public void registerShutdownHook() {
-        Thread shutdownHook = new Thread(){
-            public void run(){
+        Thread shutdownHook = new Thread() {
+            public void run() {
                 doClose();
             }
         };

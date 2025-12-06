@@ -1,16 +1,15 @@
 package com.sonicge.context.annotation;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.ClassUtil;
+
 import com.sonicge.beans.BeansException;
 import com.sonicge.beans.PropertyValues;
 import com.sonicge.beans.config.InstantiationAwareBeanPostProcessor;
 import com.sonicge.beans.factory.BeanFactory;
 import com.sonicge.beans.factory.BeanFactoryAware;
 import com.sonicge.beans.factory.ConfigurableListableBeanFactory;
-import org.dom4j.util.StringUtils;
+import com.sonicge.core.convert.ConversionService;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
@@ -30,9 +29,18 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
             //遍历所有的属性，判断是否添加了Value注解
             Value annotation = field.getAnnotation(Value.class);
             if (annotation != null) {
-                String value = annotation.value();
-                value = beanFactory.resolveEmbeddedValue(value);
-                BeanUtil.setFieldValue(bean, field.getName(), value);
+                Object value = annotation.value();
+                value = beanFactory.resolveEmbeddedValue((String) value);
+
+                //类型转换
+                Class<?> sourceType = value.getClass();
+                Class<?> targetType = field.getType();
+                ConversionService conversionService = this.beanFactory.getConversionService();
+                if (conversionService != null) {
+                    if (conversionService.canConvert(sourceType, targetType)) {
+                        conversionService.convert(value, targetType);
+                    }
+                }
             }
         }
 

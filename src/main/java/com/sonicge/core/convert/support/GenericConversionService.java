@@ -1,5 +1,6 @@
 package com.sonicge.core.convert.support;
 
+import cn.hutool.core.convert.BasicType;
 import com.sonicge.core.convert.ConversionService;
 import com.sonicge.core.convert.converter.ConvertRegistry;
 import com.sonicge.core.convert.converter.Converter;
@@ -15,6 +16,7 @@ public class GenericConversionService implements ConversionService, ConvertRegis
 
     /**
      * 判断是否存在sourceType类型 到 targetType类型的转换器
+     *
      * @param sourceType
      * @param targetType
      * @return
@@ -27,6 +29,7 @@ public class GenericConversionService implements ConversionService, ConvertRegis
 
     /**
      * 根据sourceType、targetType的继承关系层次，从map中找到对应的converter
+     *
      * @param sourceType
      * @param targetType
      * @return
@@ -59,6 +62,7 @@ public class GenericConversionService implements ConversionService, ConvertRegis
     @Override
     public <T> T convert(Object source, Class<T> targetType) {
         Class<?> sourceType = source.getClass();
+        targetType = (Class<T>) BasicType.wrap(targetType);
         //应该是遍历自己的层级关系，然后找到对应的Converter！
         GenericConverter converter = getConverter(sourceType, targetType);
         return (T) converter.convert(source, sourceType, targetType);
@@ -66,6 +70,7 @@ public class GenericConversionService implements ConversionService, ConvertRegis
 
 
     // ============================================ConvertRegistry接口============================================
+
     /**
      * 添加普通的Converter转换器，支持一对一转换
      *
@@ -83,6 +88,7 @@ public class GenericConversionService implements ConversionService, ConvertRegis
 
     /**
      * 添加高级一点的ConveterFactory转换器，支持一对多转换，就凭他ConvertiblePair中String -> Number。很多类型在进行转换的时候都可以使这个转换器
+     *
      * @param converterFactory
      */
     @Override
@@ -98,13 +104,14 @@ public class GenericConversionService implements ConversionService, ConvertRegis
 
     /**
      * 添加更高级的通用转换器，包括属性Set<ConvertiblePair>，只需要实现getConvertibleTypes方法、convert方法即可。
+     *
      * @param genericConverter
      */
 
     @Override
     public void addGenericConverter(GenericConverter genericConverter) {
         for (GenericConverter.ConvertiblePair convertiblePair : genericConverter.getConvertibleTypes()) {
-            converters.put(convertiblePair,genericConverter);
+            converters.put(convertiblePair, genericConverter);
         }
     }
 
@@ -133,6 +140,8 @@ public class GenericConversionService implements ConversionService, ConvertRegis
      */
     private List<Class<?>> getClassHierarchy(Class<?> clazz) {
         List<Class<?>> hierarchy = new ArrayList<>();
+        //原始类转为包装类
+        clazz = BasicType.wrap(clazz);
         while (clazz != null) {
             hierarchy.add(clazz);
             clazz = clazz.getSuperclass();

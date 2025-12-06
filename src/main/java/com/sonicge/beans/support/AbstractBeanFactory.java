@@ -5,6 +5,7 @@ import com.sonicge.beans.config.BeanDefinition;
 import com.sonicge.beans.config.BeanPostProcessor;
 import com.sonicge.beans.config.ConfigurableBeanFactory;
 import com.sonicge.beans.factory.FactoryBean;
+import com.sonicge.core.convert.ConversionService;
 import com.sonicge.util.StringValueResolver;
 
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
     private final Map<String, Object> factoryBeanObjectCache = new HashMap<>();
 
     private final List<StringValueResolver> embeddedValueResolvers = new ArrayList<StringValueResolver>();
+
+    private ConversionService conversionService;
 
     @Override
     public Object getBean(String name) throws BeansException {
@@ -93,8 +96,24 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
         return result;
     }
 
+    @Override
+    public boolean containsBean(String name) {
+        return containsBeanDefinition(name);
+    }
+
+    public abstract boolean containsBeanDefinition(String beanName);
+
     protected abstract Object createBean(String beanName, BeanDefinition beanDefinition) throws BeansException;
 
     protected abstract BeanDefinition getBeanDefinition(String beanName) throws BeansException;
 
+    @Override
+    public void setConversionService(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
+
+    @Override
+    public ConversionService getConversionService() {
+        return this.conversionService;
+    }
 }

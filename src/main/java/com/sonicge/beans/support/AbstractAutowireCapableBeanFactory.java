@@ -2,24 +2,22 @@ package com.sonicge.beans.support;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ClassUtil;
-import cn.hutool.core.util.ObjectUtil;
+
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.TypeUtil;
 import com.sonicge.beans.BeansException;
 import com.sonicge.beans.PropertyValue;
 import com.sonicge.beans.PropertyValues;
 import com.sonicge.beans.config.*;
-import com.sonicge.beans.factory.BeanFactory;
+
 import com.sonicge.beans.factory.BeanFactoryAware;
 import com.sonicge.beans.factory.DisposableBean;
 import com.sonicge.beans.factory.InitializingBean;
+import com.sonicge.core.convert.ConversionService;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.concurrent.Callable;
 
-import static java.lang.Boolean.parseBoolean;
 
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
@@ -152,10 +150,21 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             //1.获取属性名 和 属性类型
             String name = pv.getName();
             Object value = pv.getValue();
+            //如果是复杂类型，需要获取到对应的beanName(BeanReference里面存储)
             if (value instanceof BeanReference) {
                 BeanReference beanReference = (BeanReference) value;
                 String referenceBeanName = beanReference.getBeanName();
                 value = getBean(referenceBeanName);
+            } else {
+                //如果是简单类型的话，要进行类型转换
+                Class<?> sourceType = value.getClass();
+                Class<?> targetType = (Class<?>) TypeUtil.getFieldType(bean.getClass(), name);
+                ConversionService conversionService = getConversionService();
+                if (conversionService != null) {
+                    if (conversionService.canConvert(sourceType, targetType)) {
+                        value = conversionService.convert(value, targetType);
+                    }
+                }
             }
             try {
                 //2.通过反射设置属性
