@@ -1,10 +1,13 @@
 package com.sonicge.core.convert.converter;
 
-import java.util.Objects;
 import java.util.Set;
 
 public interface GenericConverter {
 
+    /**
+     * ConvertiblePair是一个集合，存放两个要转换的类型
+     * @return
+     */
     Set<ConvertiblePair> getConvertibleTypes();
 
     /**
@@ -16,7 +19,7 @@ public interface GenericConverter {
      */
     Object convert(Object source,Class<?> sourceType ,Class<?> targetType);
 
-    public static final class ConvertiblePair{
+    final class ConvertiblePair{
         private final Class<?> sourceType;
 
         private final Class<?> targetType;
