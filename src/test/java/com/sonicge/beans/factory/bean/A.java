@@ -7,6 +7,10 @@ public class A {
         return b;
     }
 
+    public void func(){
+
+    }
+
     public void setB(B b) {
         this.b = b;
     }

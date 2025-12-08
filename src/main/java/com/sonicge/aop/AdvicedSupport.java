@@ -4,8 +4,8 @@ package com.sonicge.aop;
 import org.aopalliance.intercept.MethodInterceptor;
 
 public class AdvicedSupport {
-    //是否使用cglib代理,默认使用jdk动态代理
-    private boolean proxyTargetClass = false;
+    //是否使用cglib代理,默认使用jdk动态代理; false -> jdk代理 ; true -> cglib代理
+    private boolean proxyTargetClass = true;
 
     public boolean isProxyTargetClass() {
         return proxyTargetClass;
