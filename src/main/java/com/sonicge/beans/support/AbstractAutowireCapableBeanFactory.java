@@ -64,8 +64,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             bean = createBeanInstance(beanDefinition);
 
             //实例化bean之后就把bean放到二级缓存中！
-            earlySingletonObjects.put(beanName,bean);
-
+            if (beanDefinition.isSingleton()) {
+                //只有单例对象，才会缓存进来
+                earlySingletonObjects.put(beanName, bean);
+            }
             //实例化bean之后执行
             boolean continueWithPropertyPopulation = applyBeanPostProcessorsAfterInstantiation(beanName, bean);
             if (!continueWithPropertyPopulation) {
@@ -76,7 +78,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             //2.为bean填充属性  （这里类似于执行bean的生命周期）
             applyPropertyValues(beanName, bean, beanDefinition);
             //3.执行bean的初始化方法和BeanPostProcessor的前置和后置处理方法
-            initializeBean(beanName, bean, beanDefinition);
+            bean = initializeBean(beanName, bean, beanDefinition);
         } catch (Exception e) {
             throw new BeansException("类的实例化失败...", e);
         }
@@ -99,7 +101,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @return
      */
     private boolean applyBeanPostProcessorsAfterInstantiation(String beanName, Object bean) {
-            boolean continueWithPropertyPopulation = true;
+        boolean continueWithPropertyPopulation = true;
         for (BeanPostProcessor beanPostProcessor : getBeanPostProcessors()) {
             if (beanPostProcessor instanceof InstantiationAwareBeanPostProcessor) {
                 //默认返回为true，一般不会进去
