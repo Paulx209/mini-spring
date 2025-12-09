@@ -47,11 +47,12 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
                 if (classFilter.matches(beanClass)) {
                     //草，之前直接传了个Class对象，搞错了。。 应该传递是Target的实例化对象
                     BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-                    Object targetBean = beanFactory.getInstantiationStrategy().instantiate(beanDefinition);
+                    //如果每次都创建bean实例的话，可能会遇到一些问题
+//                    Object targetBean = beanFactory.getInstantiationStrategy().instantiate(beanDefinition);
                     //如果当前的类是需要被代理的话
                     AdvicedSupport advicedSupport = new AdvicedSupport();
                     advicedSupport.setMethodInterceptor(methodInterceptor);
-                    advicedSupport.setTargetSource(new TargetSource(targetBean));
+                    advicedSupport.setTargetSource(new TargetSource(bean));
                     advicedSupport.setMethodMatcher(methodMatcher);
 
                     ProxyFactory proxyFactory = new ProxyFactory(advicedSupport);
