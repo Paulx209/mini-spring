@@ -17,6 +17,8 @@ public class CircularReferenceWithProxyBeanTest {
 
         System.out.println(b.getA());
         System.out.println(a);
+        System.out.println(a.getB());
+        System.out.println( b == a.getB());
         assertThat(b.getA() != a).isTrue();
     }
 }
