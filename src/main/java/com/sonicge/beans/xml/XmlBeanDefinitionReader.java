@@ -34,6 +34,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     public static final String BASE_PACKAGE_ATTRIBUTE = "base-package";
     public static final String COMPONENT_SCAN_ATTRIBUTE = "context:component-scan";
 
+    public static final String LAZY_ATTRIBUTE = "lazyInit";
+
     public XmlBeanDefinitionReader(BeanDefinitionRegistry registry) {
         super(registry);
     }
@@ -88,6 +90,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
                         String initMethodName = bean.getAttribute(INIT_METHOD_ATTRIBUTE);
                         String destroyMethodName = bean.getAttribute(DESTROY_METHOD_ATTRIBUTE);
                         String scope = bean.getAttribute(SCOPE_ATTRIBUTE);
+                        String lazyInt = bean.getAttribute(LAZY_ATTRIBUTE);
 
                         //BeanDefinition的第一个参数 ---clazz对象
                         Class<?> clazz = Class.forName(className);
@@ -101,6 +104,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
                         BeanDefinition beanDefinition = new BeanDefinition(clazz);
                         beanDefinition.setInitMethodName(initMethodName);
                         beanDefinition.setDestroyMethodName(destroyMethodName);
+                        beanDefinition.setLazy("true".equals(lazyInt));
 
                         if (StrUtil.isNotEmpty(scope)) {
                             beanDefinition.setScope(scope);

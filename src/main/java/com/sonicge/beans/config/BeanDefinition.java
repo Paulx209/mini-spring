@@ -34,6 +34,20 @@ public class BeanDefinition {
     //多实例
     private boolean prototype = false;
 
+    //懒加载
+    private boolean lazy = false;
+
+    public String getScope() {
+        return scope;
+    }
+
+    public boolean isLazy() {
+        return lazy;
+    }
+
+    public void setLazy(boolean lazy) {
+        this.lazy = lazy;
+    }
 
     public BeanDefinition() {
     }
