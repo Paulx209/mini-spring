@@ -16,6 +16,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
     //二级缓存
     protected Map<String, Object> earlySingletonObjects = new HashMap<>();
 
+    //三级缓存
     protected Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>();
 
     private final Map<String, DisposableBean> disposableBeans = new HashMap<>();
@@ -60,6 +61,9 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 
     public void addSingleton(String beanName, Object singletonObject) {
         singletonObjects.put(beanName, singletonObject);
+        //添加单例bean的时候，将二级/三级缓存中的内容都去除掉
+        earlySingletonObjects.remove(beanName);
+        singletonFactories.remove(beanName);
     }
 
     protected void addSingletonFactory(String beanName,ObjectFactory<?> singletonFactory){
