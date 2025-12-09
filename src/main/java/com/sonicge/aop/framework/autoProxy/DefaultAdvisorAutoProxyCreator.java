@@ -14,11 +14,15 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.sonicge.aop.PointCut;
 
 public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPostProcessor, BeanFactoryAware {
     private DefaultListableBeanFactory beanFactory;
+
+    private Set<Object> earlyProxyReferences = new HashSet<>();
 
     /**
      * 初始化之后执行
@@ -30,6 +34,26 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
      */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        // 检查是否已经提前进行了代理类的创建
+        if(!earlyProxyReferences.contains(beanName)){
+            return wrapIfNecessary(bean,beanName);
+        }
+        return bean;
+    }
+
+    @Override
+    public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
+        earlyProxyReferences.add(beanName);
+        return wrapIfNecessary(bean, beanName);
+    }
+
+    /**
+     * 创建代理对象方法！
+     * @param bean
+     * @param beanName
+     * @return Object -> proxy代理对象
+     */
+    protected Object wrapIfNecessary(Object bean, String beanName) {
         Class<?> beanClass = bean.getClass();
         //1.避免死循环
         if (isInfrastructureClass(beanClass)) {
