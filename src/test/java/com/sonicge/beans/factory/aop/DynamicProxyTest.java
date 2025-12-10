@@ -92,16 +92,13 @@ public class DynamicProxyTest {
         advicedSupport.setMethodMatcher(methodMatcher);
 
         advicedSupport.setProxyTargetClass(false);
-
-        ProxyFactory proxyFactory1 = new ProxyFactory(advicedSupport);
-        WorldService service1 = (WorldService) proxyFactory1.getProxy();
-        service1.explode();
+        WorldService jdkProxy = (WorldService) new ProxyFactory().getProxy();
+        jdkProxy.explode();
 
 
         advicedSupport.setProxyTargetClass(true);
-        ProxyFactory proxyFactory2 = new ProxyFactory(advicedSupport);
-        WorldService service2 = (WorldService) proxyFactory2.getProxy();
-        service2.explode();
+        WorldService cglibProxy = (WorldService) new ProxyFactory().getProxy();
+        cglibProxy.explode();
 
     }
 
@@ -127,7 +124,7 @@ public class DynamicProxyTest {
         advicedSupport.setMethodMatcher(new AspectJExpressionPointcut("execution(* com.sonicge.beans.factory.service..*(..))"));
         advicedSupport.setMethodInterceptor(adviceInterceptor);
 
-        ProxyFactory proxyFactory = new ProxyFactory(advicedSupport);
+        ProxyFactory proxyFactory = new ProxyFactory();
         WorldService service = (WorldService) proxyFactory.getProxy();
         service.explode();
     }
@@ -161,7 +158,7 @@ public class DynamicProxyTest {
             support.setMethodMatcher(advisor.getPointcut().getMethodMatcher());
             support.setMethodInterceptor((MethodInterceptor) advisor.getAdvice());
 
-            WorldService  service = (WorldService ) new ProxyFactory(support).getProxy();
+            WorldService  service = (WorldService ) new ProxyFactory().getProxy();
             service.explode();
         }
 

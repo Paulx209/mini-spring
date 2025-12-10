@@ -4,8 +4,10 @@ import com.sonicge.aop.AdvicedSupport;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+import org.aopalliance.intercept.MethodInvocation;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class CglibAopProxy implements AopProxy {
 
@@ -17,6 +19,7 @@ public class CglibAopProxy implements AopProxy {
 
     @Override
     public Object getProxy() {
+        //创建动态代理类
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(advicedSupport.getTargetSource().getTarget().getClass());
         enhancer.setInterfaces(advicedSupport.getTargetSource().getTargetClasses());
@@ -35,28 +38,35 @@ public class CglibAopProxy implements AopProxy {
 
         @Override
         public Object intercept(Object proxy, Method method, Object[] arguments, MethodProxy methodProxy) throws Throwable {
-            CglibMethodInvocation cglibMethodInvocation = new CglibMethodInvocation(advicedSupport.getTargetSource().getTarget(), method, arguments, methodProxy);
-            //判断当前代理的方法是否和expression表达式相符合！
-            if(advicedSupport.getMethodMatcher().matches(method,advicedSupport.getTargetSource().getTarget().getClass())){
-                //代理方法
-                return advicedSupport.getMethodInterceptor().invoke(cglibMethodInvocation);
+            //获取目标对象
+            Object target = advicedSupport.getTargetSource().getTarget();
+            Class<?> targetClass = target.getClass();
+            Object retVal = null;
+
+            //获取到所有的增强
+            List<Object> advisorChains = this.advicedSupport.getInterceptorAndDynamicInterceptionAdvice(method, targetClass);
+            CglibMethodInvocation cglibMethodInvocation = new CglibMethodInvocation(proxy,target,method,arguments,targetClass,advisorChains,methodProxy);
+            if (advisorChains == null || advisorChains.isEmpty()) {
+                retVal = methodProxy.invoke(target, arguments);
+            } else {
+                retVal = cglibMethodInvocation.proceed();
             }
-            return cglibMethodInvocation.proceed();
+            return retVal;
         }
     }
 
     private static class CglibMethodInvocation extends ReflectiveMethodInvocation {
         private final MethodProxy methodProxy;
 
-        public CglibMethodInvocation(Object target, Method method, Object[] arguments, MethodProxy methodProxy) {
-            super(target, method, arguments);
+        public CglibMethodInvocation(Object proxy,Object target, Method method, Object[] arguments, Class<?> targetClass,List<Object> interceptorsAndDynamicMethodMatchers,MethodProxy methodProxy) {
+            super(proxy,target, method, arguments,targetClass,interceptorsAndDynamicMethodMatchers);
             this.methodProxy = methodProxy;
         }
 
         @Override
-        public Object proceed() throws Throwable{
+        public Object proceed() throws Throwable {
             //其实这串代码就类似于  this.method.invoke(this.target,this.arguments); 只是拿MethodProxy封装起来了
-            return methodProxy.invoke(this.target,this.getArguments());
+            return super.proceed();
         }
     }
 }

@@ -1,13 +1,13 @@
 package com.sonicge.aop.framework;
 
 import com.sonicge.aop.AdvicedSupport;
-import com.sonicge.aop.MethodMatcher;
 import com.sonicge.aop.TargetSource;
-import org.aopalliance.intercept.MethodInterceptor;
+
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.List;
 
 public class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
     private final AdvicedSupport advicedSupport;
@@ -32,12 +32,18 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Object target = advicedSupport.getTargetSource().getTarget();
-        MethodMatcher methodMatcher = advicedSupport.getMethodMatcher();
-        boolean isMatch = methodMatcher.matches(method, target.getClass());
-        if(isMatch){
-            MethodInterceptor methodInterceptor = advicedSupport.getMethodInterceptor();
-            return methodInterceptor.invoke(new ReflectiveMethodInvocation(target,method,args));
+        Class<?> targetClass = target.getClass();
+        Object retVal = null;
+        //1.获取拦截器链
+        List<Object> advisorChains = this.advicedSupport.getInterceptorAndDynamicInterceptionAdvice(method, targetClass);
+        if(advisorChains == null || advisorChains.isEmpty()){
+            return method.invoke(target,args);
+        }else{
+            //2.将拦截器链统一封装成ReflectiveMethodInvocation
+            ReflectiveMethodInvocation reflectiveMethodInvocation = new ReflectiveMethodInvocation(proxy, target, method, args, targetClass, advisorChains);
+            //3.执行拦截器链
+            retVal = reflectiveMethodInvocation.proceed();
         }
-        return method.invoke(target,args);
+        return retVal;
     }
 }
