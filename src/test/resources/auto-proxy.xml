@@ -7,7 +7,7 @@
     <bean id="worldService" class="com.sonicge.beans.factory.service.WorldServiceImpl"/>
 
 <!--    创建目标类的代理对象 -->
-    <bean class="com.sonicge.aop.framework.autoProxy.DefaultAdvisorAutoProxyCreator"/>
+    <bean class="com.sonicge.aop.autoProxy.DefaultAdvisorAutoProxyCreator"/>
 
 <!--    advice 和 pointcut的集合体 -->
     <bean id="pointcutAdvisor" class="com.sonicge.aop.aspectj.AspectJExpressionPointcutAdvisor">
@@ -21,5 +21,5 @@
     </bean>
 
     <!--    before增强-->
-    <bean id="worldServiceBeforeService" class="com.sonicge.beans.factory.common.WorldServiceBeforeService"/>
+    <bean id="worldServiceBeforeService" class="com.sonicge.beans.factory.common.WorldServiceBeforeAdvice"/>
 </beans>

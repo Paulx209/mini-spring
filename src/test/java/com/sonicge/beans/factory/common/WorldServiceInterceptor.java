@@ -13,7 +13,7 @@ public class WorldServiceInterceptor implements MethodInterceptor {
         //执行原方法
         Object result = methodInvocation.proceed();
         //执行后增强
-        System.out.println("Do something before the earth explodes");
+        System.out.println("Do something after the earth explodes");
         return result;
     }
 }

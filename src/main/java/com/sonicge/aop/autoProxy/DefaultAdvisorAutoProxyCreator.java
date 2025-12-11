@@ -1,4 +1,4 @@
-package com.sonicge.aop.framework.autoProxy;
+package com.sonicge.aop.autoProxy;
 
 import com.sonicge.aop.*;
 import com.sonicge.aop.aspectj.AspectJExpressionPointcutAdvisor;

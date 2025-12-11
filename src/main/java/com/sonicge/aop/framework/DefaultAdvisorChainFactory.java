@@ -10,14 +10,14 @@ import java.util.List;
 public class DefaultAdvisorChainFactory implements  AdvisorChainFactory{
     /**
      * 获取拦截器以及动态拦截增强
-     * @param config
+     * @param advicedSupport
      * @param method
      * @param targetClass
      * @return
      */
     @Override
-    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(AdvicedSupport config, Method method, Class<?> targetClass) {
-        Advisor[] advisors = config.getAdvisors().toArray(new Advisor[0]);
+    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(AdvicedSupport advicedSupport, Method method, Class<?> targetClass) {
+        Advisor[] advisors = advicedSupport.getAdvisors().toArray(new Advisor[0]);
         ArrayList<Object> interceptorList = new ArrayList<>(advisors.length);
         Class<?> actualClass = targetClass != null ? targetClass : method.getDeclaringClass();
         for(Advisor advisor : advisors){

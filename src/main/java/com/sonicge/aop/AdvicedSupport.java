@@ -21,11 +21,12 @@ public class AdvicedSupport {
 
     private MethodMatcher methodMatcher;
 
+    //缓存method对应的拦截器链
     private transient Map<Integer, List<Object>> methodCache;
 
-    AdvisorChainFactory advisorChainFactory = new DefaultAdvisorChainFactory();
-
     private List<Advisor> advisors = new ArrayList<>();
+
+    AdvisorChainFactory advisorChainFactory = new DefaultAdvisorChainFactory();
 
     public AdvicedSupport(){
         //methodCache为线程安全的hash数组
@@ -90,6 +91,5 @@ public class AdvicedSupport {
             this.methodCache.put(cacheKey,cached);
         }
         return cached;
-
     }
 }

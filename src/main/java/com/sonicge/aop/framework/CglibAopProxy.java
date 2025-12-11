@@ -29,6 +29,9 @@ public class CglibAopProxy implements AopProxy {
         return enhancer.create();
     }
 
+    /**
+     * 该类类似于JDK中的InvocationHandler的实现类，其中intercept方法就是对方法的拦截增强！
+     */
     private static class DynamicAdvisedInterceptor implements MethodInterceptor {
         private final AdvicedSupport advicedSupport;
 
@@ -45,6 +48,7 @@ public class CglibAopProxy implements AopProxy {
 
             //获取到所有的增强
             List<Object> advisorChains = this.advicedSupport.getInterceptorAndDynamicInterceptionAdvice(method, targetClass);
+            //封装成ReflectiveMethodInvocation类，在这个类中会实现调用拦截器链逻辑
             CglibMethodInvocation cglibMethodInvocation = new CglibMethodInvocation(proxy,target,method,arguments,targetClass,advisorChains,methodProxy);
             if (advisorChains == null || advisorChains.isEmpty()) {
                 retVal = methodProxy.invoke(target, arguments);

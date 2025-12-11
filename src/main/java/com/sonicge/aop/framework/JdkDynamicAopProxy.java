@@ -25,12 +25,13 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler {
     }
 
     /**
-     * invoke方法是实现InvocationHandler接口的
+     * invoke方法是实现InvocationHandler接口的，当调用目标方法的时候就会执行invoke方法
      * @return
      * @throws Throwable
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        //之前的invoke方法就是
         Object target = advicedSupport.getTargetSource().getTarget();
         Class<?> targetClass = target.getClass();
         Object retVal = null;

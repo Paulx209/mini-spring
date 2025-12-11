@@ -12,8 +12,6 @@ import com.sonicge.beans.factory.service.WorldServiceImpl;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.Test;
 
-import java.lang.annotation.Target;
-
 public class DynamicProxyTest {
 
     private AdvicedSupport advicedSupport;
@@ -49,6 +47,7 @@ public class DynamicProxyTest {
         //AspectJExpressionPointcut -> methodMatcher类
     }
 
+
     @Test
     public void testCglibDynamicProxy() {
         //创建worldService类，构建targetSource类
@@ -83,29 +82,32 @@ public class DynamicProxyTest {
         WorldServiceInterceptor worldServiceInterceptor = new WorldServiceInterceptor();
 
         //构建MethodMatcher类  -> AspectJExpressionPointcut
-        MethodMatcher methodMatcher = new AspectJExpressionPointcut("execution(* com.sonicge.beans.factory.service..*(..))").getMethodMatcher();
+        AspectJExpressionPointcutAdvisor advisor = new AspectJExpressionPointcutAdvisor();
+        advisor.setExpression("execution(* com.sonicge.beans.factory.service..*(..))");
+        advisor.setAdvice(worldServiceInterceptor);
+        AspectJExpressionPointcut pointcut = (AspectJExpressionPointcut) advisor.getPointcut();
+        MethodMatcher methodMatcher = pointcut.getMethodMatcher();
 
         //创建AdvicedSupport类
-        AdvicedSupport advicedSupport = new AdvicedSupport();
-        advicedSupport.setTargetSource(targetSource);
-        advicedSupport.setMethodInterceptor(worldServiceInterceptor);
-        advicedSupport.setMethodMatcher(methodMatcher);
+        ProxyFactory proxyFactory = new ProxyFactory();
+        proxyFactory.setTargetSource(targetSource);
+        proxyFactory.setMethodMatcher(methodMatcher);
+        proxyFactory.addAdvisor(advisor);
 
-        advicedSupport.setProxyTargetClass(false);
-        WorldService jdkProxy = (WorldService) new ProxyFactory().getProxy();
+        proxyFactory.setProxyTargetClass(false);
+        WorldService jdkProxy = (WorldService)proxyFactory.getProxy();
         jdkProxy.explode();
 
 
-        advicedSupport.setProxyTargetClass(true);
-        WorldService cglibProxy = (WorldService) new ProxyFactory().getProxy();
+        proxyFactory.setProxyTargetClass(true);
+        WorldService cglibProxy = (WorldService) proxyFactory.getProxy();
         cglibProxy.explode();
-
     }
 
     @Test
     public void testBeforeAdvice() {
 
-        WorldServiceBeforeService beforeAdviceService = new WorldServiceBeforeService();
+        WorldServiceBeforeAdvice beforeAdviceService = new WorldServiceBeforeAdvice();
         AfterService afterService = new AfterService();
         AroundService aroundService = new AroundService();
         AfterThrowingService afterThrowingService = new AfterThrowingService();
@@ -131,7 +133,7 @@ public class DynamicProxyTest {
 
     @Test
     public void tesAdvisor() {
-        WorldServiceBeforeService beforeAdviceService = new WorldServiceBeforeService();
+        WorldServiceBeforeAdvice beforeAdviceService = new WorldServiceBeforeAdvice();
         AfterService afterService = new AfterService();
         AroundService aroundService = new AroundService();
         AfterThrowingService afterThrowingService = new AfterThrowingService();
