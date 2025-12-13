@@ -38,9 +38,10 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
                 ConversionService conversionService = this.beanFactory.getConversionService();
                 if (conversionService != null) {
                     if (conversionService.canConvert(sourceType, targetType)) {
-                        conversionService.convert(value, targetType);
+                        value = conversionService.convert(value, targetType);
                     }
                 }
+                BeanUtil.setFieldValue(bean,field.getName(),value);
             }
         }
 
